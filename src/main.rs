@@ -35,22 +35,46 @@ fn handle_client(mut stream: TcpStream) {
     } {}
 }
 
-fn main() {
-    let listener = TcpListener::bind(BIND_ADDR).unwrap();
-    println!("Listening on: {:?}", listener.local_addr().unwrap());
+fn run_server() -> Result<(), Error> {
+    // If we can't open the server, it probably means:
+    //  The port is already taken, or we are not running in sufficient permissions
+    // If we are not running in sufficient permissions, panic.
+    // If the port is open, also panic (In the future might add a feature to handle it)
+    let listener = TcpListener::bind(BIND_ADDR)?;
+    match listener.local_addr() {
+        Ok(address) => {
+            println!("Listening on: {:?}", address);
+        }
+        Err(e) => {
+            println!("Error {} while trying to get local address.", &e);
+        }
+    };
     // accept connections and process them serially
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
-                println!("New connection: {}", stream.peer_addr().unwrap());
+                println!("New connection with: {}", stream.peer_addr().unwrap());
                 thread::spawn(move || {
                     // connection succeeded
                     handle_client(stream)
                 });
             }
             Err(e) => {
-                println!("Error: {}", e);
+                println!("Connection failed: {}", e);
                 /* connection failed */
+            }
+        }
+    }
+    // TODO catch this panic
+    panic!("Exit listener loop unexpectedly")
+}
+
+fn main() {
+    loop {
+        match run_server() {
+            Ok(_) => (),
+            Err(e) => {
+                println!("Error {} when running server. Trying again.", e);
             }
         }
     }

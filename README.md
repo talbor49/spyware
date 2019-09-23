@@ -8,3 +8,9 @@ Should be able to:
 3. Run commands
 4. Upload files
 5. Download files
+
+
+
+Also:
+1. Never crash
+2. Be able to return to normal state
