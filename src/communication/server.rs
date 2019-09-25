@@ -2,14 +2,14 @@ use crate::communication::messages::{
     MessageType, RunCommandRequest, RunCommandResponse, MESSAGE_LENGTH_SIZE, MESSAGE_TYPE_SIZE,
 };
 use crate::os;
-use crate::os::run_command;
-use std::io::{Cursor, Error, Read, Write};
+
+use std::io::{Error, Read, Write};
 use std::net::{Shutdown, TcpListener, TcpStream};
 use std::str::from_utf8;
 use std::thread;
 
 use crate::communication::serialization::get_msg_type_and_length;
-use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
+use byteorder::{BigEndian, WriteBytesExt};
 use ron;
 
 const BIND_ADDR: &str = "0.0.0.0:1337";
@@ -30,7 +30,7 @@ fn run_command_message(request: RunCommandRequest) -> Result<RunCommandResponse,
     Ok(response)
 }
 
-fn handle_message(data: &[u8], size: usize, msg_type: u8, mut stream: &TcpStream) {
+fn handle_message(data: &[u8], msg_type: u8, mut stream: &TcpStream) {
     if msg_type == MessageType::RunCommandType as u8 {
         println!("Run command type!");
         let request: RunCommandRequest = ron::de::from_bytes(data).unwrap();
@@ -60,13 +60,13 @@ fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
             0 => false,
             _ => {
                 let (msg_type, msg_length) = get_msg_type_and_length(type_and_length);
-
                 let mut message = vec![0; msg_length];
-                let size = stream
-                    .read(&mut message)
+
+                // Read_exact function guarantees that we will read exactly enough data to fill the buffer
+                stream
+                    .read_exact(&mut message)
                     .expect("Could not read message after getting message metadata. Error: {}");
-                // read function guarantees that we will read all data
-                handle_message(&message, msg_length, msg_type, &stream);
+                handle_message(&message, msg_type, &stream);
                 true
             }
         },
