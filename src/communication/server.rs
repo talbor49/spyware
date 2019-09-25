@@ -8,7 +8,7 @@ use std::net::{Shutdown, TcpListener, TcpStream};
 use std::str::from_utf8;
 use std::thread;
 
-use crate::communication::utils::get_msg_type_and_length;
+use crate::communication::serialization::get_msg_type_and_length;
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use ron;
 
