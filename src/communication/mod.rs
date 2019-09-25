@@ -1,19 +1,24 @@
-use std::io::{Error, Read, Write};
+use std::io::{Cursor, Error, Read, Write};
 use std::net::{Shutdown, TcpListener, TcpStream};
 use std::str::from_utf8;
 use std::thread;
 
+use byteorder::{BigEndian, ReadBytesExt};
 use ron;
 
-use crate::communication::messages::RunCommandResponse;
+use crate::communication::messages::{Message, RunCommandResponse};
 use crate::os;
 
 mod messages;
 
 const CHUNKS: usize = 1024;
+const MESSAGE_TYPE_SIZE: usize = 1;
+const MESSAGE_LENGTH_SIZE: usize = 4;
 const BIND_ADDR: &str = "0.0.0.0:1337";
 
-fn handle_message(data: &[u8], size: usize, mut stream: &TcpStream) {
+fn handle_message_too(msg: Message) {}
+
+fn handle_message(data: &[u8], size: usize, msg_type: u8, mut stream: &TcpStream) {
     // echo everything!
     println!("Received {:?}", &data[0..size]);
     let output = os::run_command(from_utf8(&data[0..size]).unwrap());
@@ -34,26 +39,45 @@ fn handle_message(data: &[u8], size: usize, mut stream: &TcpStream) {
     stream.write(serialized_message.as_bytes()).unwrap();
 }
 
-fn handle_client(mut stream: TcpStream) {
-    println!("Handling connection from {}", stream.peer_addr().unwrap());
-    let mut data = [0 as u8; CHUNKS];
-    while match stream.read(&mut data) {
+fn get_msg_type_and_length(
+    type_and_length: [u8; MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE],
+) -> (u8, usize) {
+    let msg_type = type_and_length[0];
+    let msg_length = &type_and_length[MESSAGE_TYPE_SIZE..MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE];
+    let mut rdr = Cursor::new(msg_length);
+    let msg_length = rdr.read_u32::<BigEndian>().unwrap() as usize;
+    return (msg_type, msg_length);
+}
+
+fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
+    println!("Handling connection from {}", stream.peer_addr()?);
+    let mut type_and_length = [0 as u8; MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE];
+    while match stream.read(&mut type_and_length) {
         Ok(size) => match size {
             0 => false,
             _ => {
-                handle_message(&data, size, &stream);
+                let (msg_type, msg_length) = get_msg_type_and_length(type_and_length);
+
+                let mut message = vec![0; msg_length];
+                let size = stream
+                    .read(&mut message)
+                    .expect("Could not read message after getting message metadata. Error: {}");
+                // read function guarantees that we will read all data
+                handle_message(&message, msg_length, msg_type, &stream);
                 true
             }
         },
-        Err(_) => {
+        Err(E) => {
             println!(
-                "An error occurred, terminating connection with {}",
-                stream.peer_addr().unwrap()
+                "An error occurred, terminating connection with {}. Error: {}",
+                stream.peer_addr()?,
+                E
             );
-            stream.shutdown(Shutdown::Both).unwrap();
+            stream.shutdown(Shutdown::Both)?;
             false
         }
     } {}
+    Ok(())
 }
 
 pub fn run_server() -> Result<(), Error> {
@@ -74,9 +98,10 @@ pub fn run_server() -> Result<(), Error> {
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
-                println!("New connection with: {}", stream.peer_addr().unwrap());
+                println!("New connection with: {}", stream.peer_addr()?);
                 thread::spawn(move || {
                     // connection succeeded
+                    // TODO what to do if this returns Error
                     handle_client(stream)
                 });
             }
