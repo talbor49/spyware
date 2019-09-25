@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
 
+pub const MESSAGE_TYPE_SIZE: usize = 1;
+pub const MESSAGE_LENGTH_SIZE: usize = 4;
+
 pub enum MessageType {
     RunCommandType,
     DownloadFileType,

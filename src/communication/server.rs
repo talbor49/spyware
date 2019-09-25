@@ -1,9 +1,6 @@
-const CHUNKS: usize = 1024;
-const MESSAGE_TYPE_SIZE: usize = 1;
-const MESSAGE_LENGTH_SIZE: usize = 4;
-const BIND_ADDR: &str = "0.0.0.0:1337";
-
-use crate::communication::messages::{MessageType, RunCommandRequest, RunCommandResponse};
+use crate::communication::messages::{
+    MessageType, RunCommandRequest, RunCommandResponse, MESSAGE_LENGTH_SIZE, MESSAGE_TYPE_SIZE,
+};
 use crate::os;
 use crate::os::run_command;
 use std::io::{Cursor, Error, Read, Write};
@@ -11,10 +8,13 @@ use std::net::{Shutdown, TcpListener, TcpStream};
 use std::str::from_utf8;
 use std::thread;
 
-use byteorder::{BigEndian, ReadBytesExt};
+use crate::communication::utils::get_msg_type_and_length;
+use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use ron;
 
-fn run_command_message(request: RunCommandRequest, mut stream: &TcpStream) {
+const BIND_ADDR: &str = "0.0.0.0:1337";
+
+fn run_command_message(request: RunCommandRequest) -> Result<RunCommandResponse, Error> {
     let output = os::run_command(&request.command);
     let output = output.unwrap();
 
@@ -27,29 +27,29 @@ fn run_command_message(request: RunCommandRequest, mut stream: &TcpStream) {
 
     println!("Message: {:?}", response);
 
-    let serialized_message = ron::ser::to_string(&response).unwrap();
-
-    println!("Message serialized : {:?}", &serialized_message);
-    stream.write(serialized_message.as_bytes()).unwrap();
+    Ok(response)
 }
 
 fn handle_message(data: &[u8], size: usize, msg_type: u8, mut stream: &TcpStream) {
     if msg_type == MessageType::RunCommandType as u8 {
         println!("Run command type!");
         let request: RunCommandRequest = ron::de::from_bytes(data).unwrap();
+        let response = run_command_message(request).unwrap();
+        let serialized_message = ron::ser::to_string(&response).unwrap();
+        let message_len = serialized_message.len();
+        let message_type = MessageType::RunCommandType as u8;
+
+        let mut buffer: Vec<u8> =
+            Vec::with_capacity(message_len + MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE);
+        buffer.push(message_type);
+        buffer.write_u32::<BigEndian>(message_len as u32).unwrap();
+        buffer.extend(serialized_message.into_bytes());
+
+        println!("Buffer sending: {:?}", &buffer);
+        stream.write(&buffer).unwrap();
     } else if msg_type == MessageType::DownloadFileType as u8 {
         println!("Download file type!")
     }
-}
-
-fn get_msg_type_and_length(
-    type_and_length: [u8; MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE],
-) -> (u8, usize) {
-    let msg_type = type_and_length[0];
-    let msg_length = &type_and_length[MESSAGE_TYPE_SIZE..MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE];
-    let mut rdr = Cursor::new(msg_length);
-    let msg_length = rdr.read_u32::<BigEndian>().unwrap() as usize;
-    return (msg_type, msg_length);
 }
 
 fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
