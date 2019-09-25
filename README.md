@@ -14,3 +14,12 @@ Should be able to:
 Also:
 1. Never crash
 2. Be able to return to normal state
+
+
+
+TODO by order:
+* Implement better messages protocol (type+size+data)
+* Implement controller
+* Implement tests
+* Make error handling better
+* Implement more messages
