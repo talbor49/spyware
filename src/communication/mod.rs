@@ -6,8 +6,9 @@ use std::thread;
 use byteorder::{BigEndian, ReadBytesExt};
 use ron;
 
-use crate::communication::messages::{Message, RunCommandResponse};
+use crate::communication::messages::{MessageType, RunCommandRequest, RunCommandResponse};
 use crate::os;
+use crate::os::run_command;
 
 mod messages;
 
@@ -16,27 +17,32 @@ const MESSAGE_TYPE_SIZE: usize = 1;
 const MESSAGE_LENGTH_SIZE: usize = 4;
 const BIND_ADDR: &str = "0.0.0.0:1337";
 
-fn handle_message_too(msg: Message) {}
-
-fn handle_message(data: &[u8], size: usize, msg_type: u8, mut stream: &TcpStream) {
-    // echo everything!
-    println!("Received {:?}", &data[0..size]);
-    let output = os::run_command(from_utf8(&data[0..size]).unwrap());
+fn run_command_message(request: RunCommandRequest, mut stream: &TcpStream) {
+    let output = os::run_command(&request.command);
     let output = output.unwrap();
 
+    println!("Output: {}", from_utf8(&output.stdout).unwrap());
     let response = RunCommandResponse {
         stdout: output.stdout,
         stderr: output.stderr,
         error_code: output.status.code().unwrap_or(-1),
     };
 
-    //            println!("Output: {}", from_utf8(&output.stdout).unwrap());
     println!("Message: {:?}", response);
 
     let serialized_message = ron::ser::to_string(&response).unwrap();
 
     println!("Message serialized : {:?}", &serialized_message);
     stream.write(serialized_message.as_bytes()).unwrap();
+}
+
+fn handle_message(data: &[u8], size: usize, msg_type: u8, mut stream: &TcpStream) {
+    if msg_type == MessageType::RunCommandType as u8 {
+        println!("Run command type!");
+        let _request: RunCommandRequest = ron::de::from_bytes(data).unwrap();
+    } else if msg_type == MessageType::DownloadFileType as u8 {
+        println!("Download file type!")
+    }
 }
 
 fn get_msg_type_and_length(
@@ -67,11 +73,11 @@ fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
                 true
             }
         },
-        Err(E) => {
+        Err(e) => {
             println!(
                 "An error occurred, terminating connection with {}. Error: {}",
                 stream.peer_addr()?,
-                E
+                e
             );
             stream.shutdown(Shutdown::Both)?;
             false

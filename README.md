@@ -21,5 +21,7 @@ TODO by order:
 * Implement better messages protocol (type+size+data)
 * Implement controller
 * Implement tests
-* Make error handling better
+* Make error handling better - https://rust-lang-nursery.github.io/cli-wg/tutorial/errors.html
 * Implement more messages
+* Implement logging
+* Encryption for logs, communication
