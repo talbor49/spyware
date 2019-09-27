@@ -27,3 +27,4 @@ TODO by order:
 * Implement logging
 * Encryption for logs, communication
 * Add CI
+* Implement CLI controller

