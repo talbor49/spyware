@@ -1,18 +1,16 @@
-use crate::communication::messages::{
-    Message, MessageType, RunCommandRequest, RunCommandResponse, MESSAGE_HEADER_LENGTH,
-    MESSAGE_LENGTH_SIZE, MESSAGE_TYPE_SIZE,
-};
-use crate::os;
-
 use std::io::{Error, Read, Write};
 use std::net::{Shutdown, TcpListener, TcpStream};
 use std::str::from_utf8;
 use std::thread;
 
-use crate::communication::serialization::extract_msg_type_and_length;
 use byteorder::{BigEndian, WriteBytesExt};
 use ron;
-use std::sync::mpsc::TryRecvError;
+
+use crate::communication::messages::{
+    Message, MessageType, RunCommandRequest, RunCommandResponse, MESSAGE_HEADER_LENGTH,
+};
+use crate::communication::serialization::extract_msg_type_and_length;
+use crate::os;
 
 const BIND_ADDR: &str = "0.0.0.0:1337";
 
@@ -81,7 +79,6 @@ fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
             return Err(e);
         }
     }
-    panic!("Unexpectedly exited stream read.");
 }
 
 fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
