@@ -12,7 +12,9 @@ use crate::communication::messages::{
 use crate::communication::serialization::extract_msg_type_and_length;
 use crate::os;
 
-const BIND_ADDR: &str = "0.0.0.0:1337";
+pub const PORT: u32 = 1337;
+pub const BIND_ANY: &str = "0.0.0.0";
+pub const LOOPBACK_IP: &str = "127.0.0.1";
 
 fn run_command_message(request: RunCommandRequest) -> Result<RunCommandResponse, Error> {
     let output = os::run_command(&request.command);
@@ -51,7 +53,7 @@ fn handle_message(message: Message, mut stream: &TcpStream) {
     }
 }
 
-fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
+pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
     let mut type_and_length = [0 as u8; MESSAGE_HEADER_LENGTH];
     match stream.read_exact(&mut type_and_length) {
         Ok(()) => {
@@ -99,12 +101,12 @@ fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn run_server() -> Result<(), Error> {
+pub fn run_server(port: u32) -> Result<(), Error> {
     // If we can't open the server, it probably means:
     // - The port is already taken, or we are not running in sufficient permissions
     // - If we are not running in sufficient permissions, panic.
     // - If the port is open, also panic (In the future might add a feature to handle it)
-    let listener = TcpListener::bind(BIND_ADDR)?;
+    let listener = TcpListener::bind(format!("{}:{}", BIND_ANY, port))?;
     match listener.local_addr() {
         Ok(address) => {
             println!("Listening on: {:?}", address);
