@@ -3,7 +3,9 @@ use std::net::{Shutdown, TcpStream};
 use std::thread;
 
 use rustdoor::communication;
-use rustdoor::communication::server::{LOOPBACK_IP, PORT};
+use rustdoor::communication::server::PORT;
+
+const LOOPBACK_IP: &str = "127.0.0.1";
 
 pub fn connect_to_backdoor(addr: &str) -> Result<TcpStream, Error> {
     match TcpStream::connect(addr) {
@@ -28,7 +30,7 @@ fn test_basic_connection() {
 }
 
 fn run_server_and_connect() -> TcpStream {
-    // Test will fail on panic, if run server or connect fails
+    // Test will fail on panic if run_server or connect_to_backdoor fails
     thread::spawn(|| communication::server::run_server(PORT).unwrap());
     let hundred_millis = std::time::Duration::from_millis(100);
     thread::sleep(hundred_millis);

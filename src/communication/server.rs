@@ -14,7 +14,6 @@ use crate::os;
 
 pub const PORT: u32 = 1337;
 pub const BIND_ANY: &str = "0.0.0.0";
-pub const LOOPBACK_IP: &str = "127.0.0.1";
 
 fn run_command_message(request: RunCommandRequest) -> Result<RunCommandResponse, Error> {
     let output = os::run_command(&request.command);
