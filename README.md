@@ -1,5 +1,5 @@
 # Rustdoor
-[![build](https://travis-ci.com/talbor49/rustdoor.svg?branch=master)](https://travis-ci.com/talbor49/rustdoor)
+[![build](https://travis-ci.org/talbor49/rustdoor.svg?branch=master)](https://travis-ci.org/talbor49/rustdoor)
 
 Rusty backdoor
 
