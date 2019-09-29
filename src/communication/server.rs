@@ -3,7 +3,6 @@ use std::net::{Shutdown, TcpListener, TcpStream};
 use std::str::from_utf8;
 use std::thread;
 
-use byteorder::{BigEndian, WriteBytesExt};
 use ron;
 
 use crate::communication::messages::{
@@ -13,7 +12,6 @@ use crate::communication::messages::{
 use crate::communication::serialization::{extract_msg_type_and_length, serialize_message};
 use crate::os;
 
-pub const PORT: u32 = 1337;
 pub const BIND_ANY: &str = "0.0.0.0";
 
 fn run_command_message(request: RunCommandRequest) -> Result<RunCommandResponse, Error> {

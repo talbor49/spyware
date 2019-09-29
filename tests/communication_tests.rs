@@ -1,11 +1,11 @@
-use std::io::{Error, Write};
+use std::io::Error;
 use std::net::{Shutdown, TcpStream};
 use std::thread;
 
 use rustdoor::communication;
-use rustdoor::communication::server::PORT;
 
 const LOOPBACK_IP: &str = "127.0.0.1";
+const PORT: u32 = 1337;
 
 pub fn connect_to_backdoor(addr: &str) -> Result<TcpStream, Error> {
     match TcpStream::connect(addr) {
@@ -41,5 +41,5 @@ fn test_basic_connection() {
 
 #[test]
 fn test_send_basic_command() {
-    let stream = run_server_and_connect().unwrap();
+    let _stream = run_server_and_connect().unwrap();
 }
