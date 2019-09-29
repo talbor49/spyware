@@ -35,8 +35,3 @@ fn run_server_and_connect() -> TcpStream {
     let stream = connect_to_backdoor(&format!("{}:{}", LOOPBACK_IP, PORT)).unwrap();
     return stream;
 }
-
-#[test]
-fn test_simple_message() {
-    assert_eq!(1, 1);
-}
