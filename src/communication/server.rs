@@ -7,9 +7,10 @@ use byteorder::{BigEndian, WriteBytesExt};
 use ron;
 
 use crate::communication::messages::{
-    Message, MessageType, RunCommandRequest, RunCommandResponse, MESSAGE_HEADER_LENGTH,
+    Message, MessageType, MessageTypes, RunCommandRequest, RunCommandResponse,
+    MESSAGE_HEADER_LENGTH,
 };
-use crate::communication::serialization::extract_msg_type_and_length;
+use crate::communication::serialization::{extract_msg_type_and_length, serialize_message};
 use crate::os;
 
 pub const PORT: u32 = 1337;
@@ -32,23 +33,15 @@ fn run_command_message(request: RunCommandRequest) -> Result<RunCommandResponse,
 }
 
 fn handle_message(message: Message, mut stream: &TcpStream) {
-    if message.message_type == MessageType::RunCommandType as u8 {
+    if message.get_type() == MessageTypes::RunCommandRequest as u8 {
         println!("Run command type!");
         let request: RunCommandRequest = ron::de::from_bytes(&message.serialized_message).unwrap();
         let response = run_command_message(request).unwrap();
-        let serialized_message = ron::ser::to_string(&response).unwrap();
-        let message_len = serialized_message.len();
-        let message_type = MessageType::RunCommandType as u8;
 
-        let mut buffer: Vec<u8> = Vec::with_capacity(message_len + MESSAGE_HEADER_LENGTH);
-        buffer.push(message_type);
-        buffer.write_u32::<BigEndian>(message_len as u32).unwrap();
-        buffer.extend(serialized_message.into_bytes());
+        let buffer = serialize_message(response).unwrap();
 
         println!("Buffer sending: {:?}", &buffer);
         stream.write(&buffer).unwrap();
-    } else if message.message_type == MessageType::DownloadFileType as u8 {
-        println!("Download file type!")
     }
 }
 
