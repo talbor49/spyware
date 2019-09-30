@@ -1,5 +1,6 @@
 # Rustdoor
 [![build](https://travis-ci.org/talbor49/rustdoor.svg?branch=master)](https://travis-ci.org/talbor49/rustdoor)
+[![License:MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![codecov](https://codecov.io/gh/talbor49/rustdoor/branch/master/graph/badge.svg)](https://codecov.io/gh/talbor49/rustdoor)
 
 Rusty backdoor
