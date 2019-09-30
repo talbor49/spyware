@@ -1,8 +1,10 @@
-use std::io::Error;
+use std::io::{Error, Write};
 use std::net::{Shutdown, TcpStream};
 use std::thread;
 
 use rustdoor::communication;
+use rustdoor::communication::messages::RunCommandRequest;
+use rustdoor::communication::serialization::serialize_message;
 
 const LOOPBACK_IP: &str = "127.0.0.1";
 const PORT: u32 = 1337;
@@ -41,5 +43,11 @@ fn test_basic_connection() {
 
 #[test]
 fn test_send_basic_command() {
-    let _stream = run_server_and_connect().unwrap();
+    let mut stream = run_server_and_connect().unwrap();
+    let message = RunCommandRequest {
+        command: String::from(""),
+        async_run: false,
+    };
+    let buffer = serialize_message(message).unwrap();
+    stream.write(&buffer).unwrap();
 }
