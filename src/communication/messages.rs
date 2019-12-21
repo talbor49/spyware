@@ -40,8 +40,7 @@ impl MessageType for RunCommandRequest {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RunCommandResponse {
-    pub stdout: Vec<u8>,
-    pub stderr: Vec<u8>,
+    pub output: String,
     pub error_code: i32,
 }
 

@@ -1,6 +1,5 @@
 use std::io::{Error, Read, Write};
 use std::net::{Shutdown, TcpListener, TcpStream};
-use std::str::from_utf8;
 use std::thread;
 
 use ron;
@@ -15,19 +14,21 @@ use crate::os;
 pub const BIND_ANY: &str = "0.0.0.0";
 
 fn run_command_message(request: RunCommandRequest) -> Result<RunCommandResponse, Error> {
-    let output = os::run_command(&request.command);
-    let output = output.unwrap();
-
-    println!("Output: {}", from_utf8(&output.stdout).unwrap());
-    let response = RunCommandResponse {
-        stdout: output.stdout,
-        stderr: output.stderr,
-        error_code: output.status.code().unwrap_or(-1),
-    };
-
-    println!("Message: {:?}", response);
-
-    Ok(response)
+    let result = os::run_command(&request.command);
+    match result {
+        Ok(output) => {
+            return Ok(RunCommandResponse {
+                output,
+                error_code: 0
+            })
+        },
+        Err(e) => {
+            return Ok(RunCommandResponse {
+                output: String::from(""),
+                error_code: e.raw_os_error().unwrap_or(0)
+            })
+        }
+    }
 }
 
 fn handle_message(message: Message, mut stream: &TcpStream) {

