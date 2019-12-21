@@ -4,7 +4,7 @@ mod communication;
 pub mod os;
 
 const RETRY_INTERVAL_SECONDS: u64 = 60;
-const PORT: u32 = 1337;
+const PORT: u32 = 13337;
 
 fn main() {
     loop {
