@@ -13,6 +13,7 @@ pub trait MessageType {
     fn get_type(&self) -> u8;
 }
 
+#[derive(Debug)]
 pub struct Message {
     pub message_type: u8,
     pub serialized_message_length: usize,
