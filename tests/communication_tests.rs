@@ -1,20 +1,15 @@
-mod command_tests;
-use command_tests::run_server_and_connect;
-use rand::Rng;
-use std::io::{Write};
+mod communication_utils;
+use communication_utils::run_server_and_connect;
+use std::io::{sink, Read, Write};
 
-use rustdoor::communication::messages::{RunCommandRequest};
+use rustdoor::communication::messages::RunCommandRequest;
 use rustdoor::communication::serialization::serialize_message;
-use std::net::{Shutdown};
-
-const MIN_PORT_VALUE: u16 = 1024;
-const MAX_PORT_VALUE: u16 = 65535;
+use std::net::Shutdown;
 
 #[test]
 fn test_basic_connection() {
-    let random_port = rand::thread_rng().gen_range(MIN_PORT_VALUE, MAX_PORT_VALUE);
     // Test will fail on panic, if run server or connect fails
-    let stream = run_server_and_connect(random_port).unwrap();
+    let stream = run_server_and_connect().unwrap();
     // This will print some errors like:
     // An error occurred, terminating connection with 127.0.0.1:2886. Error: failed to fill whole buffer.
     // This is because we are closing connection unexpectedly. It's ok.
@@ -23,12 +18,17 @@ fn test_basic_connection() {
 
 #[test]
 fn test_send_basic_command() {
-    let random_port = rand::thread_rng().gen_range(MIN_PORT_VALUE, MAX_PORT_VALUE);
-    let mut stream = run_server_and_connect(random_port).unwrap();
+    let mut stream = run_server_and_connect().unwrap();
     let message = RunCommandRequest {
         command: String::from("dir"),
         async_run: false,
     };
     let buffer = serialize_message(message).unwrap();
-    stream.write(&buffer).unwrap();
+    stream
+        .write(&buffer)
+        .expect("Could not write to server after connection");
+    let mut response_buffer = Vec::new();
+    stream
+        .read(&mut response_buffer)
+        .expect("Could not read response from server");
 }

@@ -66,7 +66,7 @@ impl MessageType for DownloadFileRequest {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DownloadFileResponse {
-    pub buffer: Vec<u8>,
+    pub file_data: Vec<u8>,
 }
 
 impl MessageType for DownloadFileResponse {

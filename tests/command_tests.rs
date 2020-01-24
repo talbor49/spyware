@@ -1,28 +1,21 @@
-use rustdoor::communication;
-use std::io::Error;
-use std::net::TcpStream;
-use std::thread;
+mod communication_utils;
+use communication_utils::run_server_and_connect;
+use rustdoor::communication::messages::DownloadFileRequest;
+use rustdoor::communication::serialization::serialize_message;
+use std::io::{Read, Write};
 
-const LOOPBACK_IP: &str = "127.0.0.1";
-
-pub fn connect_to_backdoor(addr: &str) -> Result<TcpStream, Error> {
-    match TcpStream::connect(addr) {
-        Ok(stream) => {
-            println!("Successfully connected to backdoor at address {}", addr);
-            Ok(stream)
-        }
-        Err(e) => {
-            println!("Failed to connect to backdoor: {}", e);
-            Err(e)
-        }
-    }
-}
-
-pub fn run_server_and_connect(port: u16) -> Result<TcpStream, Error> {
-    // Test will fail on panic if run_server or connect_to_backdoor fails
-    thread::spawn(move || communication::server::run_server(port).unwrap());
-    let hundred_millis = std::time::Duration::from_millis(100);
-    thread::sleep(hundred_millis);
-    let stream = connect_to_backdoor(&format!("{}:{}", LOOPBACK_IP, port))?;
-    return Ok(stream);
+#[test]
+fn test_download_file_request() {
+    let mut stream = run_server_and_connect().unwrap();
+    let message = DownloadFileRequest {
+        path: String::from("/tmp/thefile"),
+        async_run: false,
+    };
+    let buffer = serialize_message(message).unwrap();
+    stream.write(&buffer).unwrap();
+    let mut response_buffer = Vec::new();
+    stream
+        .read(&mut response_buffer)
+        .expect("Could not read response from server");
+    println!("The read file response: {:?}", &response_buffer);
 }

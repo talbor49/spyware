@@ -1,3 +1,4 @@
+use std::fs::read_to_string;
 use std::io::{Error, Read, Write};
 use std::net::{Shutdown, TcpListener, TcpStream};
 use std::thread;
@@ -5,8 +6,8 @@ use std::thread;
 use ron;
 
 use crate::communication::messages::{
-    Message, MessageType, MessageTypes, RunCommandRequest, RunCommandResponse,
-    MESSAGE_HEADER_LENGTH,
+    DownloadFileRequest, DownloadFileResponse, Message, MessageType, MessageTypes,
+    RunCommandRequest, RunCommandResponse, MESSAGE_HEADER_LENGTH,
 };
 use crate::communication::serialization::{extract_msg_type_and_length, serialize_message};
 use crate::os;
@@ -39,11 +40,29 @@ fn handle_message(message: Message, mut stream: &TcpStream) {
         let request: RunCommandRequest = ron::de::from_bytes(&message.serialized_message).unwrap();
         // TODO handle malformed messages instead of panicking
         let response = run_command_message(request).unwrap();
-        let buffer = serialize_message(response).unwrap();
-        println!("Buffer sending: {:?}", &buffer);
-        stream.write(&buffer).unwrap();
+        let response_buffer = serialize_message(response).unwrap();
+        println!("Buffer sending: {:?}", &response_buffer);
+        stream.write(&response_buffer).unwrap();
     } else if message.get_type() == MessageTypes::DownloadFileRequest as u8 {
-        println!("Wow! the download file request!")
+        let request: DownloadFileRequest =
+            ron::de::from_bytes(&message.serialized_message).unwrap();
+        println!("Wow! the download file request! path {}", request.path);
+        let file_data = read_to_string(request.path)
+            .expect("Could not read file")
+            .as_bytes()
+            .to_vec();
+        let response = DownloadFileResponse { file_data };
+        let response_buffer =
+            serialize_message(response).expect("Could not serialize download file response");
+        println!(
+            "Buffer sending as download file response: {:?}",
+            &response_buffer
+        );
+        stream
+            .write(&response_buffer)
+            .expect("Could not send response buffer");
+    } else {
+        println!("Unrecognized message type '{}'", message.get_type())
     }
 }
 
