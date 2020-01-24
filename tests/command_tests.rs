@@ -1,6 +1,6 @@
 use rustdoor::communication;
-use std::io::{Error, Write};
-use std::net::{Shutdown, TcpStream};
+use std::io::Error;
+use std::net::TcpStream;
 use std::thread;
 
 const LOOPBACK_IP: &str = "127.0.0.1";

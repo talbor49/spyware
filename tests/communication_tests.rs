@@ -1,11 +1,11 @@
 mod command_tests;
 use command_tests::run_server_and_connect;
 use rand::Rng;
-use std::io::{Error, Write};
+use std::io::{Write};
 
-use rustdoor::communication::messages::{DownloadFileRequest, RunCommandRequest};
+use rustdoor::communication::messages::{RunCommandRequest};
 use rustdoor::communication::serialization::serialize_message;
-use std::net::{Shutdown, TcpStream};
+use std::net::{Shutdown};
 
 const MIN_PORT_VALUE: u16 = 1024;
 const MAX_PORT_VALUE: u16 = 65535;
