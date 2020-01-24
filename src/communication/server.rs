@@ -17,16 +17,18 @@ fn run_command_message(request: RunCommandRequest) -> Result<RunCommandResponse,
     let result = os::run_command(&request.command);
     match result {
         Ok(output) => {
+            println!("Command execution succeed, output: {}", output);
             return Ok(RunCommandResponse {
                 output,
                 error_code: 0,
-            })
+            });
         }
         Err(e) => {
+            println!("Command execution failed, error: {}", e);
             return Ok(RunCommandResponse {
                 output: String::from(""),
                 error_code: e.raw_os_error().unwrap_or(0),
-            })
+            });
         }
     }
 }
@@ -35,10 +37,9 @@ fn handle_message(message: Message, mut stream: &TcpStream) {
     if message.get_type() == MessageTypes::RunCommandRequest as u8 {
         println!("Run command type!");
         let request: RunCommandRequest = ron::de::from_bytes(&message.serialized_message).unwrap();
+        // TODO handle malformed messages instead of panicking
         let response = run_command_message(request).unwrap();
-
         let buffer = serialize_message(response).unwrap();
-
         println!("Buffer sending: {:?}", &buffer);
         stream.write(&buffer).unwrap();
     } else {
@@ -92,7 +93,7 @@ fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn run_server(port: u32) -> Result<(), Error> {
+pub fn run_server(port: u16) -> Result<(), Error> {
     // If we can't open the server, it probably means:
     // - The port is already taken, or we are not running in sufficient permissions
     // - If we are not running in sufficient permissions, panic.
@@ -106,7 +107,7 @@ pub fn run_server(port: u32) -> Result<(), Error> {
             println!("Error {} while trying to get local address.", &e);
         }
     };
-    // accept connections and process them serially
+    // accept connections and process them in a new thread
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
