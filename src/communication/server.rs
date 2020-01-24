@@ -19,13 +19,13 @@ fn run_command_message(request: RunCommandRequest) -> Result<RunCommandResponse,
         Ok(output) => {
             return Ok(RunCommandResponse {
                 output,
-                error_code: 0
+                error_code: 0,
             })
-        },
+        }
         Err(e) => {
             return Ok(RunCommandResponse {
                 output: String::from(""),
-                error_code: e.raw_os_error().unwrap_or(0)
+                error_code: e.raw_os_error().unwrap_or(0),
             })
         }
     }
@@ -41,6 +41,7 @@ fn handle_message(message: Message, mut stream: &TcpStream) {
 
         println!("Buffer sending: {:?}", &buffer);
         stream.write(&buffer).unwrap();
+    } else {
     }
 }
 
@@ -60,7 +61,6 @@ pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
                 serialized_message_length: msg_length,
                 serialized_message: message,
             });
-            //                handle_message(&message, msg_type, &stream);
         }
         Err(e) => {
             println!(
