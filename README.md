@@ -32,3 +32,4 @@ TODO by order:
 - Add CI
 - Implement CLI controller
 - Find better ways to communicate instead of listening on port - maybe OOB data?
+- Document with rustdoc

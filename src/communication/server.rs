@@ -92,7 +92,7 @@ fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn run_server(port: u32) -> Result<(), Error> {
+pub fn run_server(port: u16) -> Result<(), Error> {
     // If we can't open the server, it probably means:
     // - The port is already taken, or we are not running in sufficient permissions
     // - If we are not running in sufficient permissions, panic.
