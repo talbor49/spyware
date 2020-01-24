@@ -58,9 +58,10 @@ fn handle_message(message: Message, mut stream: &TcpStream) {
             "Buffer sending as download file response: {:?}",
             &response_buffer
         );
-        stream
+        let size = stream
             .write(&response_buffer)
             .expect("Could not send response buffer");
+        println!("Sent {} bytes!", size);
     } else {
         println!("Unrecognized message type '{}'", message.get_type())
     }
