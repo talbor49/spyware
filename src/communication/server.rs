@@ -42,7 +42,8 @@ fn handle_message(message: Message, mut stream: &TcpStream) {
         let buffer = serialize_message(response).unwrap();
         println!("Buffer sending: {:?}", &buffer);
         stream.write(&buffer).unwrap();
-    } else {
+    } else if message.get_type() == MessageTypes::DownloadFileRequest as u8 {
+        println!("Wow! the download file request!")
     }
 }
 

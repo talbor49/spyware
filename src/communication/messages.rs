@@ -7,6 +7,8 @@ pub const MESSAGE_HEADER_LENGTH: usize = MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE
 pub enum MessageTypes {
     RunCommandRequest,
     RunCommandResponse,
+    DownloadFileRequest,
+    DownloadFileResponse,
 }
 
 pub trait MessageType {
@@ -47,5 +49,28 @@ pub struct RunCommandResponse {
 impl MessageType for RunCommandResponse {
     fn get_type(&self) -> u8 {
         MessageTypes::RunCommandResponse as u8
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct DownloadFileRequest {
+    pub path: String,
+    pub async_run: bool,
+}
+
+impl MessageType for DownloadFileRequest {
+    fn get_type(&self) -> u8 {
+        MessageTypes::DownloadFileRequest as u8
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct DownloadFileResponse {
+    pub buffer: Vec<u8>,
+}
+
+impl MessageType for DownloadFileResponse {
+    fn get_type(&self) -> u8 {
+        MessageTypes::DownloadFileResponse as u8
     }
 }
