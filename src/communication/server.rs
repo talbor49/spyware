@@ -17,16 +17,18 @@ fn run_command_message(request: RunCommandRequest) -> Result<RunCommandResponse,
     let result = os::run_command(&request.command);
     match result {
         Ok(output) => {
+            println!("Command execution succeed, output: {}", output);
             return Ok(RunCommandResponse {
                 output,
-                error_code: 0
-            })
-        },
+                error_code: 0,
+            });
+        }
         Err(e) => {
+            println!("Command execution failed, error: {}", e);
             return Ok(RunCommandResponse {
                 output: String::from(""),
-                error_code: e.raw_os_error().unwrap_or(0)
-            })
+                error_code: e.raw_os_error().unwrap_or(0),
+            });
         }
     }
 }
@@ -35,10 +37,9 @@ fn handle_message(message: Message, mut stream: &TcpStream) {
     if message.get_type() == MessageTypes::RunCommandRequest as u8 {
         println!("Run command type!");
         let request: RunCommandRequest = ron::de::from_bytes(&message.serialized_message).unwrap();
+        // TODO handle malformed messages instead of panicking
         let response = run_command_message(request).unwrap();
-
         let buffer = serialize_message(response).unwrap();
-
         println!("Buffer sending: {:?}", &buffer);
         stream.write(&buffer).unwrap();
     }
@@ -60,7 +61,6 @@ pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
                 serialized_message_length: msg_length,
                 serialized_message: message,
             });
-            //                handle_message(&message, msg_type, &stream);
         }
         Err(e) => {
             println!(
@@ -106,7 +106,7 @@ pub fn run_server(port: u32) -> Result<(), Error> {
             println!("Error {} while trying to get local address.", &e);
         }
     };
-    // accept connections and process them serially
+    // accept connections and process them in a new thread
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
