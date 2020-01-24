@@ -13,6 +13,7 @@ byteorder = "1.3.2"
 cmd_lib = "*"
 
 [profile.release]
-opt-level = 'z'
 lto = true
+opt-level = 'z'  # Optimize for size.
+panic = 'abort'
 codegen-units = 1
