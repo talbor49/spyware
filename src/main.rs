@@ -1,7 +1,7 @@
 use std::alloc::System;
 
 // Use system allocator as global allocator
-// This is done in order to not use JEMALLOC which
+// This is done in order to not use JEMALLOC which takes up a lot of space in the binary
 #[global_allocator]
 static GLOBAL_ALLOCATOR: System = System;
 
@@ -33,12 +33,13 @@ fn run_server_loop() {
 
 fn run_cnc_connection_loop() {
     loop {
-        // For now, just sleep. In the future implement CNC
+        // For now, just sleep. TODO implement CNC
         std::thread::sleep(time::Duration::from_secs(RETRY_INTERVAL_SECONDS))
     }
 }
 
 fn main() {
+    // Support several ways of communication - cnc remote server + local server listening on port.
     let server_handler = thread::spawn(|| run_server_loop());
     let cnc_connect = thread::spawn(|| run_cnc_connection_loop());
 

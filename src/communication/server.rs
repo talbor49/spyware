@@ -117,9 +117,10 @@ fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
 pub fn run_server(port: u16) -> Result<(), Error> {
     // If we can't open the server, it probably means:
     // - The port is already taken, or we are not running in sufficient permissions
-    // - If we are not running in sufficient permissions, panic.
-    // - If the port is open, also panic (In the future might add a feature to handle it)
-    let listener = TcpListener::bind(format!("{}:{}", BIND_ANY, port))?;
+    // - We thread both as recoverable errors, since if the port is not open now it might be open later.
+    // - And, in addition, we have other ways to communicate so we should try them too instead of panicking.
+    let listener = match TcpListener::bind(format!("{}:{}", BIND_ANY, port))?;
+
     match listener.local_addr() {
         Ok(address) => {
             println!("Listening on: {:?}", address);
