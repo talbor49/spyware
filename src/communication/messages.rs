@@ -15,6 +15,12 @@ pub trait MessageType {
     fn get_type(&self) -> u8;
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ErrorInfo {
+    pub raw_os_error: i32,
+    pub as_string: String
+}
+
 #[derive(Debug)]
 pub struct Message {
     pub message_type: u8,
@@ -43,7 +49,7 @@ impl MessageType for RunCommandRequest {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RunCommandResponse {
     pub output: String,
-    pub error_code: i32,
+    pub error_info: Option<ErrorInfo>
 }
 
 impl MessageType for RunCommandResponse {
@@ -66,6 +72,7 @@ impl MessageType for DownloadFileRequest {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DownloadFileResponse {
     pub file_data: Vec<u8>,
+    pub error_info: Option<ErrorInfo>
 }
 
 impl MessageType for DownloadFileResponse {

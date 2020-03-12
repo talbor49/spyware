@@ -5,31 +5,51 @@ use std::thread;
 
 use ron;
 
-use crate::communication::messages::{
-    DownloadFileRequest, DownloadFileResponse, Message, MessageType, MessageTypes,
-    RunCommandRequest, RunCommandResponse, MESSAGE_HEADER_LENGTH,
-};
+use crate::communication::messages::{DownloadFileRequest, DownloadFileResponse, Message, MessageType, MessageTypes, RunCommandRequest, RunCommandResponse, MESSAGE_HEADER_LENGTH, ErrorInfo};
 use crate::communication::serialization::{extract_msg_type_and_length, serialize_message};
 use crate::os;
 
 pub const BIND_ANY: &str = "0.0.0.0";
 
-fn run_command_message(request: RunCommandRequest) -> Result<RunCommandResponse, Error> {
+fn run_command_message(request: RunCommandRequest) -> RunCommandResponse {
     let result = os::run_command(&request.command);
-    match result {
+    return match result {
         Ok(output) => {
             println!("Command execution succeed, output: {}", output);
-            return Ok(RunCommandResponse {
+            RunCommandResponse {
                 output,
-                error_code: 0,
-            });
+                error_info: None
+            }
         }
-        Err(e) => {
-            println!("Command execution failed, error: {}", e);
-            return Ok(RunCommandResponse {
+        Err(err) => {
+            println!("Command execution failed, error: {}", err);
+            RunCommandResponse {
                 output: String::from(""),
-                error_code: e.raw_os_error().unwrap_or(0),
-            });
+                error_info: Some(ErrorInfo {
+                    raw_os_error: err.raw_os_error().unwrap_or(-1),
+                    as_string: err.to_string()
+                })
+            }
+        }
+    }
+}
+
+fn download_file_message(request: DownloadFileRequest) -> DownloadFileResponse {
+    return match read_to_string(request.path) {
+        Ok(data) => {
+            DownloadFileResponse {
+                file_data: data.as_bytes().to_vec(),
+                error_info: None
+            }
+        },
+        Err(err) => {
+            DownloadFileResponse {
+                file_data: vec![],
+                error_info: Some(ErrorInfo {
+                    raw_os_error: err.raw_os_error().unwrap_or(-1),
+                    as_string: err.to_string()
+                })
+            }
         }
     }
 }
@@ -38,8 +58,7 @@ fn handle_message(message: Message, mut stream: &TcpStream) {
     if message.get_type() == MessageTypes::RunCommandRequest as u8 {
         println!("Run command type!");
         let request: RunCommandRequest = ron::de::from_bytes(&message.serialized_message).unwrap();
-        // TODO handle malformed messages instead of panicking
-        let response = run_command_message(request).unwrap();
+        let response = run_command_message(request);
         let response_buffer = serialize_message(response).unwrap();
         println!("Buffer sending: {:?}", &response_buffer);
         stream.write(&response_buffer).unwrap();
@@ -47,11 +66,7 @@ fn handle_message(message: Message, mut stream: &TcpStream) {
         let request: DownloadFileRequest =
             ron::de::from_bytes(&message.serialized_message).unwrap();
         println!("Wow! the download file request! path {}", request.path);
-        let file_data = read_to_string(request.path)
-            .expect("Could not read file")
-            .as_bytes()
-            .to_vec();
-        let response = DownloadFileResponse { file_data };
+        let response = download_file_message(request);
         let response_buffer =
             serialize_message(response).expect("Could not serialize download file response");
         println!(
