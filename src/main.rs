@@ -7,7 +7,7 @@ static GLOBAL_ALLOCATOR: System = System;
 
 use std::{thread, time};
 
-mod communication;
+pub mod communication;
 pub mod os;
 
 const RETRY_INTERVAL_SECONDS: u64 = 60;

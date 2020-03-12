@@ -54,8 +54,7 @@ impl MessageType for RunCommandResponse {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DownloadFileRequest {
-    pub path: String,
-    pub async_run: bool,
+    pub path: String
 }
 
 impl MessageType for DownloadFileRequest {

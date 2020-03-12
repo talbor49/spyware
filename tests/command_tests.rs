@@ -10,8 +10,7 @@ fn test_download_file_request() {
     println!("Running a server in the background");
     let mut stream = run_server_and_connect().expect("Error in running server :(");
     let message = DownloadFileRequest {
-        path: String::from("/tmp/thefile"),
-        async_run: false,
+        path: String::from("/tmp/thefile")
     };
     let buffer = serialize_message(message).unwrap();
     println!("Sending download file request to server");
