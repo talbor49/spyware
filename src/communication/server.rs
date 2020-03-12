@@ -69,7 +69,7 @@ fn handle_message(message: Message, mut stream: &TcpStream) {
 
 pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
     let mut type_and_length = [0 as u8; MESSAGE_HEADER_LENGTH];
-    match stream.read_exact(&mut type_and_length) {
+    return match stream.read_exact(&mut type_and_length) {
         Ok(()) => {
             let (msg_type, msg_length) = extract_msg_type_and_length(type_and_length);
             let mut message = vec![0; msg_length];
@@ -78,11 +78,11 @@ pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
             stream
                 .read_exact(&mut message)
                 .expect("Could not read message after getting message metadata. Error: {}");
-            return Ok(Message {
+            Ok(Message {
                 message_type: msg_type,
                 serialized_message_length: msg_length,
                 serialized_message: message,
-            });
+            })
         }
         Err(e) => {
             println!(
@@ -91,7 +91,7 @@ pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
                 e
             );
             stream.shutdown(Shutdown::Both)?;
-            return Err(e);
+            Err(e)
         }
     }
 }

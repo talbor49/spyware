@@ -3,9 +3,7 @@ use communication_utils::run_server_and_connect;
 use rustdoor::communication::messages::DownloadFileRequest;
 use rustdoor::communication::serialization::serialize_message;
 use rustdoor::communication::server::get_message;
-use std::io::{Read, Write};
-use std::thread;
-use std::time;
+use std::io::{Write};
 
 #[test]
 fn test_download_file_request() {

