@@ -7,7 +7,7 @@
 ### Motivation
 Spyware that spies on you, by you (for once)
 
-###Includes
+### Includes
 #### Backdoor
     * Connect
     * Run commands
@@ -17,12 +17,12 @@ Spyware that spies on you, by you (for once)
     * Report information to the server
     * Can pull commands from server
     
-####Generic features
+#### Generic features
     * Never crash
     * Be able to return to normal state after failure
     * Cross platform - windows/linux/[android/ios]
 
-####TODO:
+#### TODO:
     - Implement better messages protocol (type+size+data) V
     - Implement controller V
     - Implement tests
