@@ -1,8 +1,8 @@
 mod communication_utils;
 use communication_utils::run_server_and_connect;
-use rustdoor::communication::messages::DownloadFileRequest;
-use rustdoor::communication::serialization::serialize_message;
-use rustdoor::communication::server::get_message;
+use spyware::communication::messages::DownloadFileRequest;
+use spyware::communication::serialization::serialize_message;
+use spyware::communication::server::get_message;
 use std::io::{Write};
 
 #[test]

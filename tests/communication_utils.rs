@@ -1,5 +1,5 @@
 use rand::Rng;
-use rustdoor::communication;
+use spyware::communication;
 use std::io::Error;
 use std::net::TcpStream;
 use std::thread;

@@ -2,8 +2,8 @@
 // use communication_utils::run_server_and_connect;
 // use std::io::{Read, Write};
 
-// use rustdoor::communication::messages::RunCommandRequest;
-// use rustdoor::communication::serialization::serialize_message;
+// use spyware::communication::messages::RunCommandRequest;
+// use spyware::communication::serialization::serialize_message;
 // use std::net::Shutdown;
 
 // #[test]

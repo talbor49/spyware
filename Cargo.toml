@@ -1,5 +1,5 @@
 [package]
-name = "rustdoor"
+name = "spyware"
 version = "0.1.0"
 authors = ["talbor49 <talbor49@gmail.com>"]
 edition = "2018"
