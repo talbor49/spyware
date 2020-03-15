@@ -18,7 +18,7 @@ pub trait MessageType {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ErrorInfo {
     pub raw_os_error: i32,
-    pub as_string: String
+    pub as_string: String,
 }
 
 #[derive(Debug)]
@@ -49,7 +49,7 @@ impl MessageType for RunCommandRequest {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RunCommandResponse {
     pub output: String,
-    pub error_info: Option<ErrorInfo>
+    pub error_info: Option<ErrorInfo>,
 }
 
 impl MessageType for RunCommandResponse {
@@ -60,7 +60,7 @@ impl MessageType for RunCommandResponse {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DownloadFileRequest {
-    pub path: String
+    pub path: String,
 }
 
 impl MessageType for DownloadFileRequest {
@@ -72,7 +72,7 @@ impl MessageType for DownloadFileRequest {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DownloadFileResponse {
     pub file_data: Vec<u8>,
-    pub error_info: Option<ErrorInfo>
+    pub error_info: Option<ErrorInfo>,
 }
 
 impl MessageType for DownloadFileResponse {

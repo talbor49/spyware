@@ -5,7 +5,10 @@ use std::thread;
 
 use ron;
 
-use crate::communication::messages::{DownloadFileRequest, DownloadFileResponse, Message, MessageType, MessageTypes, RunCommandRequest, RunCommandResponse, MESSAGE_HEADER_LENGTH, ErrorInfo};
+use crate::communication::messages::{
+    DownloadFileRequest, DownloadFileResponse, ErrorInfo, Message, MessageType, MessageTypes,
+    RunCommandRequest, RunCommandResponse, MESSAGE_HEADER_LENGTH,
+};
 use crate::communication::serialization::{extract_msg_type_and_length, serialize_message};
 use crate::os;
 
@@ -18,7 +21,7 @@ fn run_command_message(request: RunCommandRequest) -> RunCommandResponse {
             println!("Command execution succeed, output: {}", output);
             RunCommandResponse {
                 output,
-                error_info: None
+                error_info: None,
             }
         }
         Err(err) => {
@@ -27,31 +30,27 @@ fn run_command_message(request: RunCommandRequest) -> RunCommandResponse {
                 output: String::from(""),
                 error_info: Some(ErrorInfo {
                     raw_os_error: err.raw_os_error().unwrap_or(-1),
-                    as_string: err.to_string()
-                })
+                    as_string: err.to_string(),
+                }),
             }
         }
-    }
+    };
 }
 
 fn download_file_message(request: DownloadFileRequest) -> DownloadFileResponse {
     return match read_to_string(request.path) {
-        Ok(data) => {
-            DownloadFileResponse {
-                file_data: data.as_bytes().to_vec(),
-                error_info: None
-            }
+        Ok(data) => DownloadFileResponse {
+            file_data: data.as_bytes().to_vec(),
+            error_info: None,
         },
-        Err(err) => {
-            DownloadFileResponse {
-                file_data: vec![],
-                error_info: Some(ErrorInfo {
-                    raw_os_error: err.raw_os_error().unwrap_or(-1),
-                    as_string: err.to_string()
-                })
-            }
-        }
-    }
+        Err(err) => DownloadFileResponse {
+            file_data: vec![],
+            error_info: Some(ErrorInfo {
+                raw_os_error: err.raw_os_error().unwrap_or(-1),
+                as_string: err.to_string(),
+            }),
+        },
+    };
 }
 
 fn handle_message(message: Message, mut stream: &TcpStream) {
@@ -108,7 +107,7 @@ pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
             stream.shutdown(Shutdown::Both)?;
             Err(e)
         }
-    }
+    };
 }
 
 fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
