@@ -5,14 +5,19 @@ use std::thread;
 
 use ron;
 
-use crate::communication::messages::{
-    DownloadFileRequest, DownloadFileResponse, ErrorInfo, Message, MessageType, MessageTypes,
-    RunCommandRequest, RunCommandResponse, MESSAGE_HEADER_LENGTH,
-};
+use crate::communication::messages::{DownloadFileRequest, DownloadFileResponse, ErrorInfo, Message, MessageType, MessageTypes, RunCommandRequest, RunCommandResponse, MESSAGE_HEADER_LENGTH, GetBasicInfoRequest, GetBasicInfoResponse};
 use crate::communication::serialization::{extract_msg_type_and_length, serialize_message};
 use crate::os;
 
 pub const BIND_ANY: &str = "0.0.0.0";
+
+fn get_basic_info_request() -> GetBasicInfoResponse {
+    GetBasicInfoResponse {
+        version: "placeholder".to_string(),
+        arch: "placeholder".to_string(),
+        error_info: None
+    }
+}
 
 fn run_command_message(request: RunCommandRequest) -> RunCommandResponse {
     let result = os::run_command(&request.command);
@@ -76,6 +81,15 @@ fn handle_message(message: Message, mut stream: &TcpStream) {
             .write(&response_buffer)
             .expect("Could not send response buffer");
         println!("Sent {} bytes!", size);
+    } else if message.get_type() == MessageTypes::GetBasicInfoRequest as u8 {
+        let request: GetBasicInfoRequest =
+            ron::de::from_bytes(&message.serialized_message).unwrap();
+        let response = get_basic_info_request();
+        let response_buffer =
+            serialize_message(response).expect("Could not serialize download file response");
+        let size = stream
+            .write(&response_buffer)
+            .expect("Could not send response buffer");
     } else {
         println!("Unrecognized message type '{}'", message.get_type())
     }
@@ -110,7 +124,7 @@ pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
     };
 }
 
-fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
+pub fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
     println!("Handling connection from {}", stream.peer_addr()?);
     while match get_message(&mut stream) {
         Ok(message) => {

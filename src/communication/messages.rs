@@ -9,6 +9,8 @@ pub enum MessageTypes {
     RunCommandResponse,
     DownloadFileRequest,
     DownloadFileResponse,
+    GetBasicInfoRequest,
+    GetBasicInfoResponse
 }
 
 pub trait MessageType {
@@ -78,5 +80,30 @@ pub struct DownloadFileResponse {
 impl MessageType for DownloadFileResponse {
     fn get_type(&self) -> u8 {
         MessageTypes::DownloadFileResponse as u8
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetBasicInfoRequest {
+    // For now we don't really have anything to insert here, but
+    pub placeholder: String
+}
+
+impl MessageType for GetBasicInfoRequest {
+    fn get_type(&self) -> u8 {
+        MessageTypes::GetBasicInfoRequest as u8
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetBasicInfoResponse {
+    pub version: String,
+    pub arch: String,
+    pub error_info: Option<ErrorInfo>,
+}
+
+impl MessageType for GetBasicInfoResponse {
+    fn get_type(&self) -> u8 {
+        MessageTypes::GetBasicInfoResponse as u8
     }
 }

