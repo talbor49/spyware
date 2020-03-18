@@ -7,12 +7,14 @@ use ron;
 use crate::communication::actions::{
     download_file_message, get_basic_info_request, run_command_message,
 };
-use crate::communication::messages::{DownloadFileRequest, GetBasicInfoRequest, Message,
-                                     MessageTypes, RunCommandRequest, MESSAGE_HEADER_LENGTH, MessageType};
+use crate::communication::messages::{
+    DownloadFileRequest, GetBasicInfoRequest, Message, MessageType, MessageTypes,
+    RunCommandRequest, MESSAGE_HEADER_LENGTH,
+};
 use crate::communication::serialization::{extract_msg_type_and_length, serialize_message};
 use serde::Serialize;
 
-use num_traits::{FromPrimitive};
+use num_traits::FromPrimitive;
 
 pub const BIND_ANY: &str = "0.0.0.0";
 
@@ -30,26 +32,25 @@ fn handle_message(message: Message, stream: &TcpStream) {
     match MessageTypes::from_u8(message.message_type) {
         Some(MessageTypes::RunCommandRequest) => {
             println!("Run command type!");
-            let request: RunCommandRequest = ron::de::from_bytes(&message.serialized_message).unwrap();
+            let request: RunCommandRequest =
+                ron::de::from_bytes(&message.serialized_message).unwrap();
             let response = run_command_message(request);
             send_response(response, stream).unwrap();
-        },
+        }
         Some(MessageTypes::DownloadFileRequest) => {
             let request: DownloadFileRequest =
                 ron::de::from_bytes(&message.serialized_message).unwrap();
             println!("Wow! the download file request! path {}", request.path);
             let response = download_file_message(request);
             send_response(response, stream).unwrap();
-        },
+        }
         Some(MessageTypes::GetBasicInfoRequest) => {
             let _request: GetBasicInfoRequest =
                 ron::de::from_bytes(&message.serialized_message).unwrap();
             let response = get_basic_info_request();
             send_response(response, stream).unwrap();
-        },
-        _ => {
-            println!("Unrecognized message type '{}'", message.get_type())
-        },
+        }
+        _ => println!("Unrecognized message type '{}'", message.get_type()),
     }
 }
 

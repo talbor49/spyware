@@ -3,7 +3,7 @@ use std::io::{Cursor, Error};
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use serde::Serialize;
 
-use crate::communication::messages::{MESSAGE_HEADER_LENGTH, MESSAGE_TYPE_SIZE, MessageType};
+use crate::communication::messages::{MessageType, MESSAGE_HEADER_LENGTH, MESSAGE_TYPE_SIZE};
 
 pub fn extract_msg_type_and_length(type_and_length: [u8; MESSAGE_HEADER_LENGTH]) -> (u8, usize) {
     let msg_type = type_and_length[0];

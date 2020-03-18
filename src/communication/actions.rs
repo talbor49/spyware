@@ -1,5 +1,8 @@
-use crate::communication::messages::{DownloadFileRequest, DownloadFileResponse, ErrorInfo, GetBasicInfoResponse, RunCommandRequest, RunCommandResponse, OperatingSystem, PointerWidth, Architecture};
-use crate::{os};
+use crate::communication::messages::{
+    Architecture, DownloadFileRequest, DownloadFileResponse, ErrorInfo, GetBasicInfoResponse,
+    OperatingSystem, PointerWidth, RunCommandRequest, RunCommandResponse,
+};
+use crate::os;
 use std::fs::read_to_string;
 
 // This method of getting the target OS is cool because:

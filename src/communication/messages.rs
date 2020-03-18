@@ -39,14 +39,13 @@ impl MessageType for Message {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RunCommandRequest {
     pub command: String,
-    pub async_run: bool
+    pub async_run: bool,
 }
 impl MessageType for RunCommandRequest {
     fn get_type(&self) -> u8 {
         MessageTypes::RunCommandRequest as u8
     }
 }
-
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RunCommandResponse {
@@ -91,7 +90,6 @@ impl MessageType for GetBasicInfoRequest {
     }
 }
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub enum OperatingSystem {
     Windows,
@@ -100,7 +98,7 @@ pub enum OperatingSystem {
     MacOS,
     IOS,
     Android,
-    Unknown
+    Unknown,
 }
 
 #[allow(non_camel_case_types)]
@@ -112,7 +110,7 @@ pub enum Architecture {
     powerpc,
     powerpc64,
     arm,
-    aarch64
+    aarch64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
