@@ -1,13 +1,17 @@
 use std::alloc::System;
 
+#[macro_use]
+extern crate enum_primitive_derive;
+extern crate num_traits;
+
 // Use system allocator as global allocator
 // This is done in order to not use JEMALLOC which takes up a lot of space in the binary
 #[global_allocator]
 static GLOBAL_ALLOCATOR: System = System;
 
-use std::{thread, time};
-use std::net::TcpStream;
 use crate::communication::server::handle_client;
+use std::net::TcpStream;
+use std::{thread, time};
 
 pub mod communication;
 pub mod os;

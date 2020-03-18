@@ -1,97 +1,55 @@
-use std::fs::read_to_string;
 use std::io::{Error, Read, Write};
 use std::net::{Shutdown, TcpListener, TcpStream};
 use std::thread;
 
 use ron;
 
-use crate::communication::messages::{DownloadFileRequest, DownloadFileResponse, ErrorInfo, Message, MessageType, MessageTypes, RunCommandRequest, RunCommandResponse, MESSAGE_HEADER_LENGTH, GetBasicInfoRequest, GetBasicInfoResponse};
+use crate::communication::actions::{
+    download_file_message, get_basic_info_request, run_command_message,
+};
+use crate::communication::messages::{DownloadFileRequest, GetBasicInfoRequest, Message,
+                                     MessageTypes, RunCommandRequest, MESSAGE_HEADER_LENGTH, MessageType};
 use crate::communication::serialization::{extract_msg_type_and_length, serialize_message};
-use crate::os;
+use serde::Serialize;
+
+use num_traits::{FromPrimitive};
 
 pub const BIND_ANY: &str = "0.0.0.0";
 
-fn get_basic_info_request() -> GetBasicInfoResponse {
-    GetBasicInfoResponse {
-        version: "placeholder".to_string(),
-        arch: "placeholder".to_string(),
-        error_info: None
-    }
+fn send_response(
+    response: impl Serialize + MessageType,
+    mut stream: &TcpStream,
+) -> Result<(), Error> {
+    let response_buffer = serialize_message(response)?;
+    println!("Buffer sending: {:?}", &response_buffer);
+    stream.write(&response_buffer)?;
+    Ok(())
 }
 
-fn run_command_message(request: RunCommandRequest) -> RunCommandResponse {
-    let result = os::run_command(&request.command);
-    return match result {
-        Ok(output) => {
-            println!("Command execution succeed, output: {}", output);
-            RunCommandResponse {
-                output,
-                error_info: None,
-            }
-        }
-        Err(err) => {
-            println!("Command execution failed, error: {}", err);
-            RunCommandResponse {
-                output: String::from(""),
-                error_info: Some(ErrorInfo {
-                    raw_os_error: err.raw_os_error().unwrap_or(-1),
-                    as_string: err.to_string(),
-                }),
-            }
-        }
-    };
-}
-
-fn download_file_message(request: DownloadFileRequest) -> DownloadFileResponse {
-    return match read_to_string(request.path) {
-        Ok(data) => DownloadFileResponse {
-            file_data: data.as_bytes().to_vec(),
-            error_info: None,
+fn handle_message(message: Message, stream: &TcpStream) {
+    match MessageTypes::from_u8(message.message_type) {
+        Some(MessageTypes::RunCommandRequest) => {
+            println!("Run command type!");
+            let request: RunCommandRequest = ron::de::from_bytes(&message.serialized_message).unwrap();
+            let response = run_command_message(request);
+            send_response(response, stream).unwrap();
         },
-        Err(err) => DownloadFileResponse {
-            file_data: vec![],
-            error_info: Some(ErrorInfo {
-                raw_os_error: err.raw_os_error().unwrap_or(-1),
-                as_string: err.to_string(),
-            }),
+        Some(MessageTypes::DownloadFileRequest) => {
+            let request: DownloadFileRequest =
+                ron::de::from_bytes(&message.serialized_message).unwrap();
+            println!("Wow! the download file request! path {}", request.path);
+            let response = download_file_message(request);
+            send_response(response, stream).unwrap();
         },
-    };
-}
-
-fn handle_message(message: Message, mut stream: &TcpStream) {
-    if message.get_type() == MessageTypes::RunCommandRequest as u8 {
-        println!("Run command type!");
-        let request: RunCommandRequest = ron::de::from_bytes(&message.serialized_message).unwrap();
-        let response = run_command_message(request);
-        let response_buffer = serialize_message(response).unwrap();
-        println!("Buffer sending: {:?}", &response_buffer);
-        stream.write(&response_buffer).unwrap();
-    } else if message.get_type() == MessageTypes::DownloadFileRequest as u8 {
-        let request: DownloadFileRequest =
-            ron::de::from_bytes(&message.serialized_message).unwrap();
-        println!("Wow! the download file request! path {}", request.path);
-        let response = download_file_message(request);
-        let response_buffer =
-            serialize_message(response).expect("Could not serialize download file response");
-        println!(
-            "Buffer sending as download file response: {:?}",
-            &response_buffer
-        );
-        let size = stream
-            .write(&response_buffer)
-            .expect("Could not send response buffer");
-        println!("Sent {} bytes!", size);
-    } else if message.get_type() == MessageTypes::GetBasicInfoRequest as u8 {
-        let request: GetBasicInfoRequest =
-            ron::de::from_bytes(&message.serialized_message).unwrap();
-        let response = get_basic_info_request();
-        let response_buffer =
-            serialize_message(response).expect("Could not serialize download file response");
-        let size = stream
-            .write(&response_buffer)
-            .expect("Could not send response buffer");
-    } else {
-        println!("Unrecognized message type '{}'", message.get_type())
+        Some(MessageTypes::GetBasicInfoRequest) => {
+            let _request: GetBasicInfoRequest =
+                ron::de::from_bytes(&message.serialized_message).unwrap();
+            let response = get_basic_info_request();
+            send_response(response, stream).unwrap();
+        },
+        _ => {
+            println!("Unrecognized message type '{}'", message.get_type())
+        },
     }
 }
 

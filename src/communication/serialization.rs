@@ -3,7 +3,7 @@ use std::io::{Cursor, Error};
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use serde::Serialize;
 
-use crate::communication::messages::{MessageType, MESSAGE_HEADER_LENGTH, MESSAGE_TYPE_SIZE};
+use crate::communication::messages::{MESSAGE_HEADER_LENGTH, MESSAGE_TYPE_SIZE, MessageType};
 
 pub fn extract_msg_type_and_length(type_and_length: [u8; MESSAGE_HEADER_LENGTH]) -> (u8, usize) {
     let msg_type = type_and_length[0];
@@ -19,10 +19,9 @@ pub fn serialize_message(message: impl Serialize + MessageType) -> Result<Vec<u8
         panic!("Serialization error, error: {}", e.to_string());
     });
     let message_len = serialized_message.len();
-    let message_type = message.get_type();
 
     let mut buffer: Vec<u8> = Vec::with_capacity(message_len + MESSAGE_HEADER_LENGTH);
-    buffer.push(message_type);
+    buffer.push(message.get_type());
     buffer.write_u32::<BigEndian>(message_len as u32)?;
     buffer.extend(serialized_message.into_bytes());
     Ok(buffer)
