@@ -61,8 +61,8 @@ fn run_cnc_connection_loop() {
 
 fn main() {
     // Support several ways of communication - cnc remote server + local server listening on port.
-    let server_handler = thread::spawn(|| run_server_loop());
-    let cnc_connect = thread::spawn(|| run_cnc_connection_loop());
+    let server_handler = thread::spawn(run_server_loop);
+    let cnc_connect = thread::spawn(run_cnc_connection_loop);
 
     cnc_connect
         .join()

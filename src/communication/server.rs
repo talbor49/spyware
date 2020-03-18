@@ -22,7 +22,7 @@ fn send_response(
 ) -> Result<(), Error> {
     let response_buffer = serialize_message(response)?;
     println!("Buffer sending: {:?}", &response_buffer);
-    stream.write(&response_buffer)?;
+    stream.write_all(&response_buffer)?;
     Ok(())
 }
 
@@ -55,7 +55,7 @@ fn handle_message(message: Message, stream: &TcpStream) {
 
 pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
     let mut type_and_length = [0 as u8; MESSAGE_HEADER_LENGTH];
-    return match stream.read_exact(&mut type_and_length) {
+    match stream.read_exact(&mut type_and_length) {
         Ok(()) => {
             let (msg_type, msg_length) = extract_msg_type_and_length(type_and_length);
             let mut message = vec![0; msg_length];
@@ -79,12 +79,12 @@ pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
             stream.shutdown(Shutdown::Both)?;
             Err(e)
         }
-    };
+    }
 }
 
-pub fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
+pub fn handle_client(stream: TcpStream) -> Result<(), Error> {
     println!("Handling connection from {}", stream.peer_addr()?);
-    while match get_message(&mut stream) {
+    while match get_message(&stream) {
         Ok(message) => {
             handle_message(message, &stream);
             true

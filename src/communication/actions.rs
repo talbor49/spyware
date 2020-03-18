@@ -87,7 +87,7 @@ pub fn get_basic_info_request() -> GetBasicInfoResponse {
 
 pub fn run_command_message(request: RunCommandRequest) -> RunCommandResponse {
     let result = os::run_command(&request.command);
-    return match result {
+    match result {
         Ok(output) => {
             println!("Command execution succeed, output: {}", output);
             RunCommandResponse {
@@ -105,11 +105,11 @@ pub fn run_command_message(request: RunCommandRequest) -> RunCommandResponse {
                 }),
             }
         }
-    };
+    }
 }
 
 pub fn download_file_message(request: DownloadFileRequest) -> DownloadFileResponse {
-    return match read_to_string(request.path) {
+    match read_to_string(request.path) {
         Ok(data) => DownloadFileResponse {
             file_data: data.as_bytes().to_vec(),
             error_info: None,
@@ -121,5 +121,5 @@ pub fn download_file_message(request: DownloadFileRequest) -> DownloadFileRespon
                 as_string: err.to_string(),
             }),
         },
-    };
+    }
 }
