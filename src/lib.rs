@@ -1,5 +1,5 @@
 pub mod communication;
-pub mod os;
+pub mod actions;
 
 #[macro_use]
 extern crate enum_primitive_derive;

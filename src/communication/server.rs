@@ -4,9 +4,6 @@ use std::thread;
 
 use ron;
 
-use crate::communication::actions::{
-    download_file_message, get_basic_info_request, run_command_message,
-};
 use crate::communication::messages::{
     DownloadFileRequest, GetBasicInfoRequest, Message, MessageType, MessageTypes,
     RunCommandRequest, MESSAGE_HEADER_LENGTH,
@@ -15,6 +12,8 @@ use crate::communication::serialization::{extract_msg_type_and_length, serialize
 use serde::Serialize;
 
 use num_traits::FromPrimitive;
+use crate::actions::basic_info::{get_basic_info_request, download_file_message};
+use crate::actions::commands::run_command_message;
 
 pub const BIND_ANY: &str = "0.0.0.0";
 

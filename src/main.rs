@@ -14,7 +14,7 @@ use std::net::TcpStream;
 use std::{thread, time};
 
 pub mod communication;
-pub mod os;
+pub mod actions;
 
 const RETRY_INTERVAL_SECONDS: u64 = 5;
 const SERVER_LISTENING_PORT: u16 = 13337;

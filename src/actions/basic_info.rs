@@ -1,8 +1,7 @@
 use crate::communication::messages::{
     Architecture, DownloadFileRequest, DownloadFileResponse, ErrorInfo, GetBasicInfoResponse,
-    OperatingSystem, PointerWidth, RunCommandRequest, RunCommandResponse,
+    OperatingSystem, PointerWidth,
 };
-use crate::os;
 use std::fs::read_to_string;
 
 // This method of getting the target OS is cool because:
@@ -85,29 +84,6 @@ pub fn get_basic_info_request() -> GetBasicInfoResponse {
         operating_system_version: get_running_os_info(),
         pointer_width: get_pointer_width(),
         error_info: None,
-    }
-}
-
-pub fn run_command_message(request: RunCommandRequest) -> RunCommandResponse {
-    let result = os::run_command(&request.command);
-    match result {
-        Ok(output) => {
-            println!("Command execution succeed, output: {}", output);
-            RunCommandResponse {
-                output,
-                error_info: None,
-            }
-        }
-        Err(err) => {
-            println!("Command execution failed, error: {}", err);
-            RunCommandResponse {
-                output: String::from(""),
-                error_info: Some(ErrorInfo {
-                    raw_os_error: err.raw_os_error().unwrap_or(-1),
-                    as_string: err.to_string(),
-                }),
-            }
-        }
     }
 }
 
