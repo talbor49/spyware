@@ -37,3 +37,4 @@ Spyware that spies on you, by you (for once)
     - Document with rustdoc
     - Gather information (keylogger, location, wifi, etc)
     - Find ways to start after reboot - preferably also after format. 
+    - Be able to screenshot, keylog.
