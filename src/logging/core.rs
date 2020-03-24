@@ -58,14 +58,8 @@ static mut CIRCULAR_MEMORY_LOGS: Option<CircularMemoryLogs> = None;
 pub unsafe fn setup_logging(configuration: LoggingConfiguration) {
     MEMORY_LOGGER.conf = configuration;
     CIRCULAR_MEMORY_LOGS = Some(CircularMemoryLogs::new());
-    log::set_logger(&MEMORY_LOGGER).map(|()| log::set_max_level(MEMORY_LOGGER.conf.level.clone()));
-}
-
-pub fn print_logs() {
-    // Actually this is safe as this is a read only operation
-    unsafe {
-        MEMORY_LOGGER.print_all_logs();
-    }
+    log::set_logger(&MEMORY_LOGGER);
+    log::set_max_level(MEMORY_LOGGER.conf.level.clone());
 }
 
 pub fn get_logs() -> &'static Vec<String> {

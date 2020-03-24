@@ -5,7 +5,7 @@ extern crate num_traits;
 use crate::communication::server::handle_client;
 use std::net::TcpStream;
 use std::{thread, time};
-use crate::logging::core::{setup_logging, LoggingConfiguration, print_logs};
+use crate::logging::core::{setup_logging, LoggingConfiguration};
 use std::process::exit;
 use log::{info};
 
@@ -56,25 +56,26 @@ fn run_cnc_connection_loop() {
     }
 }
 
-fn init_logging() {
-    unsafe {
-        // This function is unsafe as it mutates the global logging state, initializing it.
-        // We are calling it before using any logging functionality (which would've been pointless before initialization).
-        // Also, we are calling it before creating any threads.
-        // Therefore, this is a safe operation.
-        setup_logging(LoggingConfiguration {
-            to_stdout: true,
-            to_memory: true,
-            // Allow max 10,000 characters to be written to log memory
-            // This is 4096 * 4 = 16kb.
-            max_memory_log_size_bytes: 4096 * std::mem::size_of::<char>(),
-            level: log::LevelFilter::Debug
-        });
-    }
+
+unsafe fn init_logging() {
+    setup_logging(LoggingConfiguration {
+        to_stdout: true,
+        to_memory: true,
+        // Allow max 10,000 characters to be written to log memory
+        // This is 4096 * 4 = 16kb.
+        max_memory_log_size_bytes: 4096 * std::mem::size_of::<char>(),
+        level: log::LevelFilter::Debug
+    });
 }
 
 fn main() {
-    init_logging();
+    // This function is unsafe as it mutates the global logging state, initializing it.
+    // We are calling it before using any logging functionality (which would've been pointless before initialization).
+    // Also, we are calling it before creating any threads.
+    // Therefore, this is a safe operation.
+    unsafe {
+        init_logging();
+    }
 
     // Support several ways of communication - cnc remote server + local server listening on port.
     let server_handler = thread::spawn(run_server_loop);
