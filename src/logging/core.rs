@@ -1,14 +1,14 @@
-use log::{Metadata, Record, LevelFilter};
-use queues::{CircularBuffer, IsQueue};
+use log::{Metadata, Record};
+
 use crate::logging::memory_logger::CircularMemoryLogs;
-use std::borrow::{Borrow, BorrowMut};
+
 
 struct MemoryLogger {
     conf: LoggingConfiguration
 }
 
 impl log::Log for MemoryLogger {
-    fn enabled(&self, metadata: &Metadata) -> bool {
+    fn enabled(&self, _metadata: &Metadata) -> bool {
         self.conf.to_memory
     }
 

@@ -1,5 +1,5 @@
 use spyware::logging::core::{setup_logging, LoggingConfiguration, get_logs};
-use std::io::Write;
+
 use log;
 
 #[test]

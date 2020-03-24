@@ -6,8 +6,8 @@ use crate::communication::server::handle_client;
 use std::net::TcpStream;
 use std::{thread, time};
 use crate::logging::core::{setup_logging, LoggingConfiguration};
-use std::process::exit;
-use log::{info};
+
+
 
 pub mod communication;
 pub mod actions;
