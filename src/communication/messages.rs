@@ -4,6 +4,7 @@ pub const MESSAGE_TYPE_SIZE: usize = 1;
 pub const MESSAGE_LENGTH_SIZE: usize = 4;
 pub const MESSAGE_HEADER_LENGTH: usize = MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE;
 
+// Deriving from primitive so we can
 #[derive(Primitive)]
 pub enum MessageTypes {
     RunCommandRequest = 0,
