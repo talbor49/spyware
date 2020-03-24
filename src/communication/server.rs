@@ -11,9 +11,9 @@ use crate::communication::messages::{
 use crate::communication::serialization::{extract_msg_type_and_length, serialize_message};
 use serde::Serialize;
 
-use num_traits::FromPrimitive;
-use crate::actions::basic_info::{get_basic_info_request, download_file_message};
+use crate::actions::basic_info::{download_file_message, get_basic_info_request};
 use crate::actions::commands::run_command_message;
+use num_traits::FromPrimitive;
 
 pub const BIND_ANY: &str = "0.0.0.0";
 

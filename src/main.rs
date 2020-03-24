@@ -3,14 +3,12 @@ extern crate enum_primitive_derive;
 extern crate num_traits;
 
 use crate::communication::server::handle_client;
+use crate::logging::core::{setup_logging, LoggingConfiguration};
 use std::net::TcpStream;
 use std::{thread, time};
-use crate::logging::core::{setup_logging, LoggingConfiguration};
 
-
-
-pub mod communication;
 pub mod actions;
+pub mod communication;
 pub mod logging;
 
 const RETRY_INTERVAL_SECONDS: u64 = 5;
@@ -56,7 +54,6 @@ fn run_cnc_connection_loop() {
     }
 }
 
-
 unsafe fn init_logging() {
     setup_logging(LoggingConfiguration {
         to_stdout: true,
@@ -64,7 +61,7 @@ unsafe fn init_logging() {
         // Allow max 10,000 characters to be written to log memory
         // This is 4096 * 4 = 16kb.
         max_memory_log_size_bytes: 4096 * std::mem::size_of::<char>(),
-        level: log::LevelFilter::Debug
+        level: log::LevelFilter::Debug,
     });
 }
 

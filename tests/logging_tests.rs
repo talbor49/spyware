@@ -1,4 +1,4 @@
-use spyware::logging::core::{setup_logging, LoggingConfiguration, get_logs};
+use spyware::logging::core::{get_logs, setup_logging, LoggingConfiguration};
 
 use log;
 
@@ -17,7 +17,7 @@ fn test_logging_sanity() {
             // Allow max 10,000 characters to be written to log memory
             // This is 4096 * 4 = 16kb.
             max_memory_log_size_bytes: 4096 * std::mem::size_of::<char>(),
-            level: log::LevelFilter::Debug
+            level: log::LevelFilter::Debug,
         });
     }
     assert_eq!(get_logs().len(), 0);
