@@ -12,13 +12,13 @@ impl log::Log for MemoryLogger {
     }
 
     fn log(&self, record: &Record) {
-        // TODO make this really safe
+        // This is safe - write_log function is using mutex and is thread safe.
         unsafe {
             if CIRCULAR_MEMORY_LOGS.is_some() {
                 CIRCULAR_MEMORY_LOGS
                     .as_mut()
                     .unwrap()
-                    .write_log(record.args().to_string());
+                    .write_log(format!("{} {}: {}", record.level(), record.target(), record.args()));
             }
         }
     }
@@ -63,8 +63,8 @@ static mut CIRCULAR_MEMORY_LOGS: Option<CircularMemoryLogs> = None;
 // It should only be called once, while the program is initialized, before any log mutation might happen.
 // It would be pointless to use any logging functionality before initializing it anyway.
 pub unsafe fn setup_logging(configuration: LoggingConfiguration) {
+    CIRCULAR_MEMORY_LOGS = Some(CircularMemoryLogs::new(configuration.max_memory_log_size_bytes.clone()));
     MEMORY_LOGGER.conf = configuration;
-    CIRCULAR_MEMORY_LOGS = Some(CircularMemoryLogs::new());
     log::set_logger(&MEMORY_LOGGER);
     log::set_max_level(MEMORY_LOGGER.conf.level.clone());
 }
