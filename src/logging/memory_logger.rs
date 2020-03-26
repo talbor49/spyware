@@ -1,4 +1,5 @@
 use std::sync::{Mutex};
+use std::ops::SubAssign;
 
 pub struct CircularMemoryLogs {
     logs: Mutex<Vec<String>>,
@@ -17,14 +18,15 @@ impl CircularMemoryLogs {
 
     pub fn write_log(&mut self, log: String) {
         if log.len() >= self.total_max_bytes {
-            // Log is too big to handle. This should not happen, but we should not panic
+            // Log is too big to save.
             return
         }
         self.current_bytes_count += log.len();
         let mut logs = self.logs.lock().unwrap();
         while self.current_bytes_count > self.total_max_bytes {
-            self.current_bytes_count -= logs.get(0).unwrap().len();
-            logs.remove(0);
+            self.current_bytes_count.sub_assign(
+                logs.remove(0).len()
+            );
         }
         logs.push(log);
     }

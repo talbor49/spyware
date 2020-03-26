@@ -2,13 +2,20 @@ use log::{Metadata, Record};
 
 use crate::logging::memory_logger::CircularMemoryLogs;
 
-struct MemoryLogger {
-    conf: LoggingConfiguration,
+use failure::{Fail};
+
+#[derive(Debug, Fail)]
+pub enum LoggingError {
+    #[fail(display = "Logging was not initialized, try calling setup_logging")]
+    LoggingNotInitializedError
 }
+
+
+struct MemoryLogger {}
 
 impl log::Log for MemoryLogger {
     fn enabled(&self, _metadata: &Metadata) -> bool {
-        self.conf.to_memory
+        true
     }
 
     fn log(&self, record: &Record) {
@@ -55,20 +62,30 @@ const DEFAULT_CONF: LoggingConfiguration = LoggingConfiguration {
     level: log::LevelFilter::Error,
 };
 
-static mut MEMORY_LOGGER: MemoryLogger = MemoryLogger { conf: DEFAULT_CONF };
+static MEMORY_LOGGER: MemoryLogger = MemoryLogger {};
 static mut CIRCULAR_MEMORY_LOGS: Option<CircularMemoryLogs> = None;
+
+unsafe fn setup_memory_logging(max_memory_log_size_bytes: usize) {
+    CIRCULAR_MEMORY_LOGS = Some(CircularMemoryLogs::new(max_memory_log_size_bytes));
+    log::set_logger(&MEMORY_LOGGER);
+}
 
 // This functions in unsafe. It mutates the global logger state in memory.
 // The caller must use it wisely.
 // It should only be called once, while the program is initialized, before any log mutation might happen.
 // It would be pointless to use any logging functionality before initializing it anyway.
 pub unsafe fn setup_logging(configuration: LoggingConfiguration) {
-    CIRCULAR_MEMORY_LOGS = Some(CircularMemoryLogs::new(configuration.max_memory_log_size_bytes.clone()));
-    MEMORY_LOGGER.conf = configuration;
-    log::set_logger(&MEMORY_LOGGER);
-    log::set_max_level(MEMORY_LOGGER.conf.level.clone());
+    log::set_max_level(configuration.level.clone());
+    if configuration.to_memory {
+        setup_memory_logging(configuration.max_memory_log_size_bytes);
+    }
 }
 
-pub fn get_logs() -> &'static Vec<String> {
-    unsafe { CIRCULAR_MEMORY_LOGS.as_mut().unwrap().get_all_logs() }
+pub fn get_logs() -> Result<&'static Vec<String>, LoggingError> {
+    unsafe {
+        match CIRCULAR_MEMORY_LOGS.as_mut() {
+            Some(logs) => Ok(logs.get_all_logs()),
+            None => Err(LoggingError::LoggingNotInitializedError)
+        }
+    }
 }

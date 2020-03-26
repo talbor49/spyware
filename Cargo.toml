@@ -13,6 +13,7 @@ num-traits = "0.2.11"
 enum-primitive-derive = "0.1.2"
 log = "0.4.8"
 queues = "1.1.0"
+failure = "0.1.7"
 
 [dev-dependencies]
 rand = "0.7.3"

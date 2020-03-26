@@ -1,6 +1,7 @@
+extern crate num_traits;
 #[macro_use]
 extern crate enum_primitive_derive;
-extern crate num_traits;
+#[macro_use] extern crate failure;
 
 use crate::communication::server::handle_client;
 use crate::logging::core::{setup_logging, LoggingConfiguration};
