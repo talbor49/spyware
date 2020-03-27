@@ -19,7 +19,8 @@ pub enum LoggingError {
 }
 
 struct MemoryLogger {
-    inner_logger: RwLock<CircularMemoryLogs>,
+    inner_memory_logger: RwLock<CircularMemoryLogs>,
+    configuration: LoggingConfiguration
 }
 
 impl log::Log for MemoryLogger {
@@ -28,28 +29,43 @@ impl log::Log for MemoryLogger {
     }
 
     fn log(&self, record: &Record) {
-        self.inner_logger.write().unwrap().write_log(format!(
-            "{} {}: {}",
+        let log = format!(
+            "[{} {}] {}",
             record.level(),
             record.target(),
-            record.args()
-        ));
+            record.args(),
+        );
+        if self.configuration.to_stdout {
+            println!("{}", &log);
+        }
+        if self.configuration.to_memory {
+            self.inner_memory_logger.write().unwrap().write_log(log);
+        }
     }
 
     fn flush(&self) {}
 }
 
 impl MemoryLogger {
+    fn new(configuration: LoggingConfiguration) -> Self {
+        MemoryLogger {
+            inner_memory_logger: std::sync::RwLock::new(CircularMemoryLogs::new(
+                configuration.max_memory_log_size_bytes,
+            )),
+            configuration
+        }
+    }
+
     fn global() -> Option<&'static MemoryLogger> {
         MEMORY_LOGGER_INSTANCE.get()
     }
 
     fn get_logs(&self) -> Result<Vec<String>, LoggingError> {
-        Ok(self.inner_logger.read().unwrap().get_all_logs())
+        Ok(self.inner_memory_logger.read().unwrap().get_all_logs())
     }
 
     fn clear(&self) {
-        self.inner_logger.write().unwrap().clear_all_logs()
+        self.inner_memory_logger.write().unwrap().clear_all_logs()
     }
 }
 
@@ -65,18 +81,11 @@ static MEMORY_LOGGER_INSTANCE: OnceCell<MemoryLogger> = OnceCell::new();
 // It should only be called once, while the program is initialized, before any log mutation might happen.
 // It would be pointless to use any logging functionality before initializing it anyway.
 pub fn setup_logging(configuration: LoggingConfiguration) -> Result<(), LoggingError> {
-    if configuration.to_memory {
-        let memory_logger = MemoryLogger {
-            inner_logger: std::sync::RwLock::new(CircularMemoryLogs::new(
-                configuration.max_memory_log_size_bytes,
-            )),
-        };
-        match MEMORY_LOGGER_INSTANCE.set(memory_logger) {
-            Ok(_) => log::set_logger(MemoryLogger::global().unwrap()).unwrap(),
-            Err(_) => return Err(LoggingError::LoggingInitializationError)
-        };
-    }
     log::set_max_level(configuration.level);
+    match MEMORY_LOGGER_INSTANCE.set(MemoryLogger::new(configuration)) {
+        Ok(_) => log::set_logger(MemoryLogger::global().unwrap()).unwrap(),
+        Err(_) => return Err(LoggingError::LoggingInitializationError)
+    };
     Ok(())
 }
 

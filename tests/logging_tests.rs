@@ -18,7 +18,7 @@ fn test_logging() {
     }).unwrap();
     assert_eq!(get_logs().unwrap().len(), 0);
 
-    // Logging level is info so debug should not be logged
+    // Logging level is info, so debug should not be logged
     log::debug!("A");
     assert_eq!(get_logs().unwrap().len(), 0);
 
