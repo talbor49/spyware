@@ -66,12 +66,15 @@ static MEMORY_LOGGER_INSTANCE: OnceCell<MemoryLogger> = OnceCell::new();
 // It would be pointless to use any logging functionality before initializing it anyway.
 pub fn setup_logging(configuration: LoggingConfiguration) -> Result<(), LoggingError> {
     if configuration.to_memory {
-        MEMORY_LOGGER_INSTANCE.set(MemoryLogger {
+        let memory_logger = MemoryLogger {
             inner_logger: std::sync::RwLock::new(CircularMemoryLogs::new(
                 configuration.max_memory_log_size_bytes,
             )),
-        });
-        log::set_logger(MemoryLogger::global().unwrap()).unwrap();
+        };
+        match MEMORY_LOGGER_INSTANCE.set(memory_logger) {
+            Ok(_) => log::set_logger(MemoryLogger::global().unwrap()).unwrap(),
+            Err(_) => return Err(LoggingError::LoggingInitializationError)
+        };
     }
     log::set_max_level(configuration.level.clone());
     Ok(())

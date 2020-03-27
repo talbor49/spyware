@@ -64,7 +64,7 @@ fn init_logging() {
         // This is 4096 * 4 = 16kb.
         max_memory_log_size_bytes: 4096 * std::mem::size_of::<char>(),
         level: log::LevelFilter::Debug,
-    });
+    }).unwrap();
 }
 
 fn main() {
