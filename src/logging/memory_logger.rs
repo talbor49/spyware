@@ -6,7 +6,7 @@ pub struct CircularMemoryLogs {
     total_max_chars: usize,
 }
 
-fn compute_used_chars(logs: &Vec<String>) -> usize {
+fn compute_used_chars(logs: &[String]) -> usize {
     logs.iter().map(|log| log.len()).sum()
 }
 

@@ -76,14 +76,13 @@ pub fn setup_logging(configuration: LoggingConfiguration) -> Result<(), LoggingE
             Err(_) => return Err(LoggingError::LoggingInitializationError)
         };
     }
-    log::set_max_level(configuration.level.clone());
+    log::set_max_level(configuration.level);
     Ok(())
 }
 
 pub fn destroy_logging() {
-    match MemoryLogger::global() {
-        Some(logger) => logger.clear(),
-        _ => {}
+    if let Some(logger) = MemoryLogger::global() {
+        logger.clear()
     }
 }
 
