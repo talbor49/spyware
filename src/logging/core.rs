@@ -2,7 +2,7 @@ use log::{Metadata, Record};
 
 use crate::logging::memory_logger::CircularMemoryLogs;
 
-use failure::{Fail};
+use failure::Fail;
 use once_cell::sync::OnceCell;
 use std::sync::RwLock;
 
@@ -10,15 +10,16 @@ use std::sync::RwLock;
 pub enum LoggingError {
     #[fail(display = "Logging was not initialized, try calling setup_logging")]
     LoggingNotInitializedError,
-    #[fail(display = "setup_logging function was called twice, although logging can be initialized once.")]
+    #[fail(
+        display = "setup_logging function was called twice, although logging can be initialized once."
+    )]
     LoggingSetupCalledTwice,
     #[fail(display = "Could not initialize logging.")]
     LoggingInitializationError,
 }
 
-
 struct MemoryLogger {
-    inner_logger: RwLock<CircularMemoryLogs>
+    inner_logger: RwLock<CircularMemoryLogs>,
 }
 
 impl log::Log for MemoryLogger {
@@ -27,9 +28,12 @@ impl log::Log for MemoryLogger {
     }
 
     fn log(&self, record: &Record) {
-        self.inner_logger.write().unwrap().write_log(
-            format!("{} {}: {}", record.level(), record.target(), record.args())
-        );
+        self.inner_logger.write().unwrap().write_log(format!(
+            "{} {}: {}",
+            record.level(),
+            record.target(),
+            record.args()
+        ));
     }
 
     fn flush(&self) {}
@@ -63,7 +67,9 @@ static MEMORY_LOGGER_INSTANCE: OnceCell<MemoryLogger> = OnceCell::new();
 pub fn setup_logging(configuration: LoggingConfiguration) -> Result<(), LoggingError> {
     if configuration.to_memory {
         MEMORY_LOGGER_INSTANCE.set(MemoryLogger {
-            inner_logger: std::sync::RwLock::new(CircularMemoryLogs::new(configuration.max_memory_log_size_bytes))
+            inner_logger: std::sync::RwLock::new(CircularMemoryLogs::new(
+                configuration.max_memory_log_size_bytes,
+            )),
         });
         log::set_logger(MemoryLogger::global().unwrap()).unwrap();
     }
@@ -81,6 +87,6 @@ pub fn destroy_logging() {
 pub fn get_logs() -> Result<Vec<String>, LoggingError> {
     match MemoryLogger::global() {
         Some(logger) => Ok(logger.get_logs().unwrap()),
-        _ => Err(LoggingError::LoggingNotInitializedError)
+        _ => Err(LoggingError::LoggingNotInitializedError),
     }
 }

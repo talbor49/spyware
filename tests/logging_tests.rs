@@ -1,4 +1,4 @@
-use spyware::logging::core::{get_logs, setup_logging, LoggingConfiguration, destroy_logging};
+use spyware::logging::core::{destroy_logging, get_logs, setup_logging, LoggingConfiguration};
 
 use log;
 
@@ -38,7 +38,7 @@ fn test_logging_levels() {
         to_stdout: true,
         to_memory: true,
         max_memory_log_size_bytes: 4096,
-        level: log::LevelFilter::Error
+        level: log::LevelFilter::Error,
     });
     assert_eq!(get_logs().unwrap().len(), 0);
     log::debug!("Hello world!");
@@ -56,7 +56,7 @@ fn test_logging_disable_memory_logging() {
         to_stdout: false,
         to_memory: false,
         max_memory_log_size_bytes: 4096,
-        level: log::LevelFilter::Debug
+        level: log::LevelFilter::Debug,
     });
     assert!(get_logs().is_err());
     // Should not panic
@@ -72,7 +72,7 @@ fn test_logging_log_too_big_to_store() {
         to_stdout: true,
         to_memory: true,
         max_memory_log_size_bytes: 4,
-        level: log::LevelFilter::Info
+        level: log::LevelFilter::Info,
     });
     assert_eq!(get_logs().unwrap().len(), 0);
     log::info!("Hey this log is bigger than 4 bytes so it won't be stored at all.");
@@ -96,7 +96,7 @@ fn test_logging_late_setup() {
         to_stdout: true,
         to_memory: true,
         max_memory_log_size_bytes: 4096,
-        level: log::LevelFilter::Info
+        level: log::LevelFilter::Info,
     });
     assert_eq!(get_logs().unwrap().len(), 0);
     log::info!("Hello, World!");
@@ -110,7 +110,7 @@ fn test_logging_rotation() {
         to_stdout: true,
         to_memory: true,
         max_memory_log_size_bytes: 48 * std::mem::size_of::<char>(),
-        level: log::LevelFilter::Info
+        level: log::LevelFilter::Info,
     });
     // 10 chars are allowed
     log::info!("A");

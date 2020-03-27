@@ -1,9 +1,9 @@
-use std::sync::{RwLock};
-use std::ops::{SubAssign};
+use std::ops::SubAssign;
+use std::sync::RwLock;
 
 pub struct CircularMemoryLogs {
     logs: RwLock<Vec<String>>,
-    total_max_chars: usize
+    total_max_chars: usize,
 }
 
 fn compute_used_chars(logs: &Vec<String>) -> usize {
@@ -15,14 +15,14 @@ impl CircularMemoryLogs {
         // Convert bytes to chars here so use is more convenient in the rest of the class
         CircularMemoryLogs {
             logs: RwLock::new(Vec::<String>::new()),
-            total_max_chars: total_max_bytes / std::mem::size_of::<char>()
+            total_max_chars: total_max_bytes / std::mem::size_of::<char>(),
         }
     }
 
     pub fn write_log(&mut self, log: String) {
         if log.len() >= self.total_max_chars {
             // Log is too big to save.
-            return
+            return;
         }
         let mut logs = self.logs.write().unwrap();
         println!("Used chars: {}", compute_used_chars(&logs));
