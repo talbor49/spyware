@@ -3,28 +3,29 @@ use std::ops::SubAssign;
 
 pub struct CircularMemoryLogs {
     logs: Mutex<Vec<String>>,
-    total_max_bytes: usize,
-    current_bytes_count: usize,
+    total_max_chars: usize,
+    current_chars_count: usize,
 }
 
 impl CircularMemoryLogs {
     pub fn new(total_max_bytes: usize) -> Self {
+        // Convert bytes to chars here so use is more convenient in the rest of the class
         CircularMemoryLogs {
             logs: Mutex::new(Vec::<String>::new()),
-            total_max_bytes,
-            current_bytes_count: 0
+            total_max_chars: total_max_bytes / std::mem::size_of::<char>(),
+            current_chars_count: 0
         }
     }
 
     pub fn write_log(&mut self, log: String) {
-        if log.len() >= self.total_max_bytes {
+        if log.len() >= self.total_max_chars {
             // Log is too big to save.
             return
         }
-        self.current_bytes_count += log.len();
+        self.current_chars_count += log.len();
         let mut logs = self.logs.lock().unwrap();
-        while self.current_bytes_count > self.total_max_bytes {
-            self.current_bytes_count.sub_assign(
+        while self.current_chars_count > self.total_max_chars {
+            self.current_chars_count.sub_assign(
                 logs.remove(0).len()
             );
         }

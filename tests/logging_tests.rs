@@ -1,4 +1,4 @@
-use spyware::logging::core::{get_logs, setup_logging, LoggingConfiguration};
+use spyware::logging::core::{get_logs, setup_logging, LoggingConfiguration, destroy_logging};
 
 use log;
 
@@ -13,26 +13,41 @@ fn do_setup_logging(conf: LoggingConfiguration) {
     }
 }
 
+fn clear_logging_state() {
+    unsafe {
+        destroy_logging()
+    }
+}
+
 #[test]
 fn test_logging_sanity() {
-    println!("Running a server in the background");
+    clear_logging_state();
 
-    do_setup_logging(LoggingConfiguration {
-        to_stdout: true,
-        to_memory: true,
-        // Allow max 10,000 characters to be written to log memory
-        // This is 4096 * 4 = 16kb.
-        max_memory_log_size_bytes: 4096 * std::mem::size_of::<char>(),
-        level: log::LevelFilter::Debug,
-    });
+    for _ in 0..1000 {
+        do_setup_logging(LoggingConfiguration {
+            to_stdout: true,
+            to_memory: true,
+            // Allow max 10,000 characters to be written to log memory
+            // This is 4096 * 4 = 16kb.
+            max_memory_log_size_bytes: 4096 * std::mem::size_of::<char>(),
+            level: log::LevelFilter::Debug,
+        });
 
-    assert_eq!(get_logs().unwrap().len(), 0);
-    log::debug!("Hello world!");
-    assert_eq!(get_logs().unwrap().len(), 1);
+        println!("Actually, look at the fucking logs: {:#?}", get_logs().unwrap());
+        for _ in 0..10000 {
+            assert_eq!(get_logs().unwrap().len(), 0);
+        }
+        // log::debug!("Hello world!");
+        // assert_eq!(get_logs().unwrap().len(), 1);
+
+        clear_logging_state();
+    }
 }
 
 #[test]
 fn test_logging_levels() {
+    clear_logging_state();
+
     do_setup_logging(LoggingConfiguration {
         to_stdout: true,
         to_memory: true,
@@ -49,6 +64,8 @@ fn test_logging_levels() {
 
 #[test]
 fn test_logging_disable_memory_logging() {
+    clear_logging_state();
+
     do_setup_logging(LoggingConfiguration {
         to_stdout: false,
         to_memory: false,
@@ -63,6 +80,8 @@ fn test_logging_disable_memory_logging() {
 
 #[test]
 fn test_logging_log_too_big_to_store() {
+    clear_logging_state();
+
     do_setup_logging(LoggingConfiguration {
         to_stdout: true,
         to_memory: true,
@@ -82,6 +101,8 @@ fn test_logging_no_setup() {
 
 #[test]
 fn test_logging_late_setup() {
+    clear_logging_state();
+
     // Should not panic
     log::info!("Hello world!");
     assert!(get_logs().is_err());
@@ -94,4 +115,24 @@ fn test_logging_late_setup() {
     assert_eq!(get_logs().unwrap().len(), 0);
     log::info!("Hello, World!");
     assert_eq!(get_logs().unwrap().len(), 1);
+}
+
+#[test]
+fn test_logging_rotation() {
+    for _ in 0..1000 {
+        clear_logging_state();
+        do_setup_logging(LoggingConfiguration {
+            to_stdout: true,
+            to_memory: true,
+            max_memory_log_size_bytes: 48 * std::mem::size_of::<char>(),
+            level: log::LevelFilter::Info
+        });
+        // 10 chars are allowed
+        log::info!("A");
+        assert_eq!(get_logs().unwrap().len(), 1);
+        log::info!("B");
+        assert_eq!(get_logs().unwrap().len(), 2);
+        log::info!("AAAAAAAA");
+        assert_eq!(get_logs().unwrap().len(), 1);
+    }
 }
