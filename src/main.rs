@@ -55,7 +55,7 @@ fn run_cnc_connection_loop() {
     }
 }
 
-unsafe fn init_logging() {
+fn init_logging() {
     setup_logging(LoggingConfiguration {
         to_stdout: true,
         to_memory: true,
@@ -67,13 +67,7 @@ unsafe fn init_logging() {
 }
 
 fn main() {
-    // This function is unsafe as it mutates the global logging state, initializing it.
-    // We are calling it before using any logging functionality (which would've been pointless before initialization).
-    // Also, we are calling it before creating any threads.
-    // Therefore, this is a safe operation.
-    unsafe {
-        init_logging();
-    }
+    init_logging();
 
     // Support several ways of communication - cnc remote server + local server listening on port.
     let server_handler = thread::spawn(run_server_loop);
