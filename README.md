@@ -1,6 +1,6 @@
 # Spyware
 
-[![build](https://travis-ci.org/talbor49/rustdoor.svg?branch=master)](https://travis-ci.org/talbor49/rustdoor)
+[![build](https://travis-ci.org/talbor49/spyware.svg?branch=master)](https://travis-ci.org/talbor49/spyware)
 [![License:MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![codecov](https://codecov.io/gh/talbor49/rustdoor/branch/master/graph/badge.svg)](https://codecov.io/gh/talbor49/rustdoor)
 
@@ -27,9 +27,9 @@ Spyware that spies on you, by you (for once)
     - Implement controller V
     - Implement tests
     - Make error handling better - https://rust-lang-nursery.github.io/cli-wg/tutorial/errors.html
-    - Report errors as a message to client
+    - Report errors as a message to client V
     - Implement more messages
-    - Implement logging
+    - Implement logging V
     - Encryption for logs, communication
     - Add CI V
     - Implement CLI controller V
@@ -38,3 +38,4 @@ Spyware that spies on you, by you (for once)
     - Gather information (keylogger, location, wifi, etc)
     - Find ways to start after reboot - preferably also after format. 
     - Be able to screenshot, keylog.
+    - More tests
