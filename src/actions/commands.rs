@@ -1,24 +1,25 @@
 use crate::communication::messages::{ErrorInfo, RunCommandRequest, RunCommandResponse};
 use cmd_lib::run_fun;
 use std::io::Error;
+use log::{debug, error};
 
 pub fn run_command(command: &str) -> Result<String, Error> {
-    println!("Running command '{}'", &command);
     run_fun!("{}", command)
 }
 
 pub fn run_command_message(request: RunCommandRequest) -> RunCommandResponse {
+    debug!("Got run command request: run command \"{}\" !", &request.command);
     let result = run_command(&request.command);
     match result {
         Ok(output) => {
-            println!("Command execution succeed, output: {}", output);
+            debug!("Command execution succeed, output: {}", output);
             RunCommandResponse {
                 output,
                 error_info: None,
             }
         }
         Err(err) => {
-            println!("Command execution failed, error: {}", err);
+            error!("Command execution failed, error: {}", err);
             RunCommandResponse {
                 output: String::from(""),
                 error_info: Some(ErrorInfo {

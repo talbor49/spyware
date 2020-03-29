@@ -25,8 +25,6 @@ impl CircularMemoryLogs {
             return;
         }
         let mut logs = self.logs.write().unwrap();
-        println!("Used chars: {}", compute_used_chars(&logs));
-        println!("Max used chars: {}", self.total_max_chars);
         logs.push(log);
         while compute_used_chars(&logs) >= self.total_max_chars {
             logs.remove(0);

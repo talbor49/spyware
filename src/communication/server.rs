@@ -1,6 +1,7 @@
 use std::io::{Error, Read, Write};
 use std::net::{Shutdown, TcpListener, TcpStream};
 use std::thread;
+use log::{debug, info, error};
 
 use ron;
 
@@ -22,7 +23,7 @@ fn send_response(
     mut stream: &TcpStream,
 ) -> Result<(), Error> {
     let response_buffer = serialize_message(response)?;
-    println!("Buffer sending: {:?}", &response_buffer);
+    debug!("Buffer sending: {:?}", &response_buffer);
     stream.write_all(&response_buffer)?;
     Ok(())
 }
@@ -30,7 +31,6 @@ fn send_response(
 fn handle_message(message: Message, stream: &TcpStream) {
     match MessageTypes::from_u8(message.message_type) {
         Some(MessageTypes::RunCommandRequest) => {
-            println!("Run command type!");
             let request: RunCommandRequest =
                 ron::de::from_bytes(&message.serialized_message).unwrap();
             let response = run_command_message(request);
@@ -39,7 +39,6 @@ fn handle_message(message: Message, stream: &TcpStream) {
         Some(MessageTypes::DownloadFileRequest) => {
             let request: DownloadFileRequest =
                 ron::de::from_bytes(&message.serialized_message).unwrap();
-            println!("Wow! the download file request! path {}", request.path);
             let response = download_file_message(request);
             send_response(response, stream).unwrap();
         }
@@ -49,7 +48,7 @@ fn handle_message(message: Message, stream: &TcpStream) {
             let response = get_basic_info_request();
             send_response(response, stream).unwrap();
         }
-        _ => println!("Unrecognized message type '{}'", message.get_type()),
+        _ => error!("Unrecognized message type '{}'", message.get_type()),
     }
 }
 
@@ -71,7 +70,7 @@ pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
             })
         }
         Err(e) => {
-            println!(
+            error!(
                 "An error occurred, terminating connection with {}. Error: {}",
                 stream.peer_addr()?,
                 e
@@ -83,14 +82,14 @@ pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
 }
 
 pub fn handle_client(stream: TcpStream) -> Result<(), Error> {
-    println!("Handling connection from {}", stream.peer_addr()?);
+    debug!("Handling connection from {}", stream.peer_addr()?);
     while match get_message(&stream) {
         Ok(message) => {
             handle_message(message, &stream);
             true
         }
         Err(e) => {
-            println!(
+            error!(
                 "An error occurred while trying to get message. Error: {}",
                 e
             );
@@ -109,17 +108,17 @@ pub fn run_server(port: u16) -> Result<(), Error> {
 
     match listener.local_addr() {
         Ok(address) => {
-            println!("Listening on: {:?}", address);
+            info!("Listening on: {:?}", address);
         }
         Err(e) => {
-            println!("Error {} while trying to get local address.", &e);
+            error!("Error {} while trying to get local address.", &e);
         }
     };
     // accept connections and process them in a new thread
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
-                println!("New connection with: {}", stream.peer_addr()?);
+                info!("New connection with: {}", stream.peer_addr()?);
                 thread::spawn(move || {
                     // connection succeeded
                     // TODO what to do if this returns Error
@@ -127,7 +126,7 @@ pub fn run_server(port: u16) -> Result<(), Error> {
                 });
             }
             Err(e) => {
-                println!("Connection failed: {}", e);
+                error!("Connection failed: {}", e);
                 /* connection failed */
             }
         }

