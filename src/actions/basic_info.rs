@@ -91,6 +91,7 @@ pub fn get_basic_info_request() -> GetBasicInfoResponse {
 
 pub fn download_file_message(request: DownloadFileRequest) -> DownloadFileResponse {
     debug!("Handling download file request: path \"{}\"", request.path);
+    // TODO this assumes the file is UTF-8 encoded, we want to download binary files too.
     match read_to_string(request.path) {
         Ok(data) => {
             DownloadFileResponse {

@@ -23,7 +23,7 @@ fn send_response(
     mut stream: &TcpStream,
 ) -> Result<(), Error> {
     let response_buffer = serialize_message(response)?;
-    debug!("Buffer sending: {:?}", &response_buffer);
+    debug!("Sending response buffer: {:?}", &response_buffer);
     stream.write_all(&response_buffer)?;
     Ok(())
 }
@@ -131,6 +131,6 @@ pub fn run_server(port: u16) -> Result<(), Error> {
             }
         }
     }
-    // TODO catch this panic
+    // TODO handle this panic
     panic!("Server closed unexpectedly")
 }
