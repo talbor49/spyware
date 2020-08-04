@@ -71,6 +71,7 @@ fn init_logging() {
 }
 
 fn main() {
+    // TODO add command line parameters to control logging
     init_logging();
     log::info!("Logging successfully initialized");
 
@@ -83,5 +84,5 @@ fn main() {
         .expect("The cnc connection has panicked.");
     server_handler
         .join()
-        .expect("The server connection has panicked.")
+        .expect("The server connection has panicked.");
 }
