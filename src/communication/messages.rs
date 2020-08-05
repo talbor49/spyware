@@ -143,8 +143,18 @@ impl MessageType for GetBasicInfoResponse {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetLogsRequest {
 }
+impl MessageType for GetLogsRequest {
+    fn get_type(&self) -> u8 {
+        MessageTypes::GetLogsRequest as u8
+    }
+}
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetLogsResponse {
     pub logs: Vec<String>,
     pub error_info: Option<ErrorInfo>
+}
+impl MessageType for GetLogsResponse {
+    fn get_type(&self) -> u8 {
+        MessageTypes::GetLogsResponse as u8
+    }
 }
