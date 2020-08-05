@@ -13,6 +13,8 @@ pub enum MessageTypes {
     DownloadFileResponse = 3,
     GetBasicInfoRequest = 4,
     GetBasicInfoResponse = 5,
+    GetLogsRequest = 6,
+    GetLogsResponse = 7
 }
 
 pub trait MessageType {
@@ -134,4 +136,15 @@ impl MessageType for GetBasicInfoResponse {
     fn get_type(&self) -> u8 {
         MessageTypes::GetBasicInfoResponse as u8
     }
+}
+
+
+/// Get logs
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetLogsRequest {
+}
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetLogsResponse {
+    pub logs: Vec<String>,
+    pub error_info: Option<ErrorInfo>
 }

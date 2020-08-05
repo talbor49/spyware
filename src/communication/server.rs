@@ -15,6 +15,7 @@ use serde::Serialize;
 use crate::actions::basic_info::{download_file_message, get_basic_info_request};
 use crate::actions::commands::run_command_message;
 use num_traits::FromPrimitive;
+use crate::actions::log_actions::get_logs_request;
 
 pub const BIND_ANY: &str = "0.0.0.0";
 
@@ -46,6 +47,10 @@ fn handle_message(message: Message, stream: &TcpStream) {
             let _request: GetBasicInfoRequest =
                 ron::de::from_bytes(&message.serialized_message).unwrap();
             let response = get_basic_info_request();
+            send_response(response, stream).unwrap();
+        },
+        Some(MessageTypes::GetLogsRequest) => {
+            let response = get_logs_request();
             send_response(response, stream).unwrap();
         }
         _ => error!("Unrecognized message type '{}'", message.get_type()),
