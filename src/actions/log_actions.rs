@@ -17,7 +17,7 @@ pub fn get_logs_request() -> GetLogsResponse {
             GetLogsResponse {
                 logs: Vec::new(),
                 error_info: Some(ErrorInfo {
-                    raw_os_error: 1,
+                    raw_os_error: 1, // Just chose a number that's not 0
                     as_string: err.name().unwrap().to_string()
                 })
             }
