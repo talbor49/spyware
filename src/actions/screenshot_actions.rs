@@ -1,41 +1,50 @@
 use scrap::{Capturer, Display};
 
 use std::io::ErrorKind::WouldBlock;
-use crate::communication::messages::GetScreenshotResponse;
+use crate::communication::messages::{GetScreenshotResponse, DisplayScreenshot};
 use log::{debug};
 use std::time::Duration;
 use std::thread;
 
+const FRAMES_PER_SECOND: u32 = 60;
+
 pub fn get_screenshot_request() -> GetScreenshotResponse {
+    let mut screenshots: Vec<DisplayScreenshot> = Vec::new();
     debug!("Getting screenshot");
 
-    let one_second = Duration::new(1, 0);
-    let one_frame = one_second / 60;
+    let one_frame = Duration::from_secs(1) / FRAMES_PER_SECOND;
+    let displays = Display::all().expect("Could not get all displays");
 
-    let display = Display::primary().expect("Couldn't find primary display.");
-    let mut capturer = Capturer::new(display).expect("Couldn't begin capture.");
-    let (w, h) = (capturer.width(), capturer.height());
+    for display in displays {
+        println!("Display id ");
+        let mut capturer = Capturer::new(display).expect("Couldn't begin capture.");
+        let (w, h) = (capturer.width(), capturer.height());
 
-    loop {
-        match capturer.frame() {
-            Ok(frame) => {
-                return GetScreenshotResponse {
-                    buffer: frame.to_vec(),
-                    width: w,
-                    height: h,
-                    error_info: None
+        loop {
+            match capturer.frame() {
+                Ok(frame) => {
+                    screenshots.push(DisplayScreenshot {
+                        buffer: frame.to_vec(),
+                        width: w,
+                        height: h
+                    })
+                },
+                Err(error) => {
+                    // TODO don't block forever
+                    if error.kind() == WouldBlock {
+                        // Keep spinning.
+                        thread::sleep(one_frame);
+                        continue;
+                    } else {
+                        panic!("Error: {}", error);
+                    }
                 }
-            },
-            Err(error) => {
-                if error.kind() == WouldBlock {
-                    // Keep spinning.
-                    thread::sleep(one_frame);
-                    continue;
-                } else {
-                    panic!("Error: {}", error);
-                }
-            }
-        };
+            };
+        }
     }
 
+    GetScreenshotResponse {
+        displays_screenshots: screenshots,
+        error_info: None
+    }
 }

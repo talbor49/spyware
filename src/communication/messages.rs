@@ -172,11 +172,17 @@ impl MessageType for GetScreenshotRequest {
         MessageTypes::GetScreenshotRequest as u8
     }
 }
+
 #[derive(Serialize, Deserialize, Debug)]
-pub struct GetScreenshotResponse {
+pub struct DisplayScreenshot {
     pub buffer: Vec<u8>,
     pub width: usize,
-    pub height: usize,
+    pub height: usize
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetScreenshotResponse {
+    pub displays_screenshots: Vec<DisplayScreenshot>,
     pub error_info: Option<ErrorInfo>
 }
 impl MessageType for GetScreenshotResponse {
