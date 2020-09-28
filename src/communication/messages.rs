@@ -14,7 +14,9 @@ pub enum MessageTypes {
     GetBasicInfoRequest = 4,
     GetBasicInfoResponse = 5,
     GetLogsRequest = 6,
-    GetLogsResponse = 7
+    GetLogsResponse = 7,
+    GetScreenshotRequest = 8,
+    GetScreenshotResponse = 9
 }
 
 pub trait MessageType {
@@ -156,5 +158,29 @@ pub struct GetLogsResponse {
 impl MessageType for GetLogsResponse {
     fn get_type(&self) -> u8 {
         MessageTypes::GetLogsResponse as u8
+    }
+}
+
+
+/// Get screenshot
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetScreenshotRequest {
+
+}
+impl MessageType for GetScreenshotRequest {
+    fn get_type(&self) -> u8 {
+        MessageTypes::GetScreenshotRequest as u8
+    }
+}
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetScreenshotResponse {
+    pub buffer: Vec<u8>,
+    pub width: usize,
+    pub height: usize,
+    pub error_info: Option<ErrorInfo>
+}
+impl MessageType for GetScreenshotResponse {
+    fn get_type(&self) -> u8 {
+        MessageTypes::GetScreenshotResponse as u8
     }
 }

