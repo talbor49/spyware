@@ -16,7 +16,7 @@ pub enum MessageTypes {
     GetLogsRequest = 6,
     GetLogsResponse = 7,
     GetScreenshotRequest = 8,
-    GetScreenshotResponse = 9
+    GetScreenshotResponse = 9,
 }
 
 pub trait MessageType {
@@ -140,11 +140,9 @@ impl MessageType for GetBasicInfoResponse {
     }
 }
 
-
 /// Get logs
 #[derive(Serialize, Deserialize, Debug)]
-pub struct GetLogsRequest {
-}
+pub struct GetLogsRequest {}
 impl MessageType for GetLogsRequest {
     fn get_type(&self) -> u8 {
         MessageTypes::GetLogsRequest as u8
@@ -153,7 +151,7 @@ impl MessageType for GetLogsRequest {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetLogsResponse {
     pub logs: Vec<String>,
-    pub error_info: Option<ErrorInfo>
+    pub error_info: Option<ErrorInfo>,
 }
 impl MessageType for GetLogsResponse {
     fn get_type(&self) -> u8 {
@@ -161,12 +159,9 @@ impl MessageType for GetLogsResponse {
     }
 }
 
-
 /// Get screenshot
 #[derive(Serialize, Deserialize, Debug)]
-pub struct GetScreenshotRequest {
-
-}
+pub struct GetScreenshotRequest {}
 impl MessageType for GetScreenshotRequest {
     fn get_type(&self) -> u8 {
         MessageTypes::GetScreenshotRequest as u8
@@ -177,13 +172,13 @@ impl MessageType for GetScreenshotRequest {
 pub struct DisplayScreenshot {
     pub buffer: Vec<u8>,
     pub width: usize,
-    pub height: usize
+    pub height: usize,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetScreenshotResponse {
     pub displays_screenshots: Vec<DisplayScreenshot>,
-    pub error_info: Option<ErrorInfo>
+    pub error_info: Option<ErrorInfo>,
 }
 impl MessageType for GetScreenshotResponse {
     fn get_type(&self) -> u8 {

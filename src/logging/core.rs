@@ -20,7 +20,7 @@ pub enum LoggingError {
 
 struct MemoryLogger {
     inner_memory_logger: RwLock<CircularMemoryLogs>,
-    configuration: LoggingConfiguration
+    configuration: LoggingConfiguration,
 }
 
 impl log::Log for MemoryLogger {
@@ -29,12 +29,7 @@ impl log::Log for MemoryLogger {
     }
 
     fn log(&self, record: &Record) {
-        let log = format!(
-            "[{} {}] {}",
-            record.level(),
-            record.target(),
-            record.args(),
-        );
+        let log = format!("[{} {}] {}", record.level(), record.target(), record.args(),);
         if self.configuration.to_stdout {
             println!("{}", &log);
         }
@@ -52,7 +47,7 @@ impl MemoryLogger {
             inner_memory_logger: std::sync::RwLock::new(CircularMemoryLogs::new(
                 configuration.max_memory_log_size_bytes,
             )),
-            configuration
+            configuration,
         }
     }
 
@@ -84,7 +79,7 @@ pub fn setup_logging(configuration: LoggingConfiguration) -> Result<(), LoggingE
     log::set_max_level(configuration.level);
     match MEMORY_LOGGER_INSTANCE.set(MemoryLogger::new(configuration)) {
         Ok(_) => log::set_logger(MemoryLogger::global().unwrap()).unwrap(),
-        Err(_) => return Err(LoggingError::LoggingInitializationError)
+        Err(_) => return Err(LoggingError::LoggingInitializationError),
     };
     Ok(())
 }

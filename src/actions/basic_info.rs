@@ -2,8 +2,8 @@ use crate::communication::messages::{
     Architecture, DownloadFileRequest, DownloadFileResponse, ErrorInfo, GetBasicInfoResponse,
     OperatingSystem, PointerWidth,
 };
-use std::io::Read;
 use log::{debug, error};
+use std::io::Read;
 
 // This method of getting the target OS is cool because:
 //  -The binary won't include all of this logic
@@ -98,11 +98,15 @@ pub fn download_file_message(request: DownloadFileRequest) -> DownloadFileRespon
             file.read_to_end(&mut buffer).unwrap();
             DownloadFileResponse {
                 file_data: buffer,
-                error_info: None
+                error_info: None,
             }
-        },
+        }
         Err(err) => {
-            error!("Could not read file \"{}\", error \"{}\"", request.path, err.to_string());
+            error!(
+                "Could not read file \"{}\", error \"{}\"",
+                request.path,
+                err.to_string()
+            );
             DownloadFileResponse {
                 file_data: vec![],
                 error_info: Some(ErrorInfo {

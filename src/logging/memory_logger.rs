@@ -1,4 +1,3 @@
-
 use std::sync::RwLock;
 
 pub struct CircularMemoryLogs {

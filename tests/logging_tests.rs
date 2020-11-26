@@ -15,7 +15,8 @@ fn test_logging() {
         to_memory: true,
         max_memory_log_size_bytes: 48 * std::mem::size_of::<char>(),
         level: log::LevelFilter::Info,
-    }).unwrap();
+    })
+    .unwrap();
     assert_eq!(get_logs().unwrap().len(), 0);
 
     // Logging level is info, so debug should not be logged

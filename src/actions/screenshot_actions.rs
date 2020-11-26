@@ -1,10 +1,10 @@
 use scrap::{Capturer, Display};
 
+use crate::communication::messages::{DisplayScreenshot, GetScreenshotResponse};
+use log::debug;
 use std::io::ErrorKind::WouldBlock;
-use crate::communication::messages::{GetScreenshotResponse, DisplayScreenshot};
-use log::{debug};
-use std::time::Duration;
 use std::thread;
+use std::time::Duration;
 
 const FRAMES_PER_SECOND: u32 = 60;
 
@@ -22,13 +22,11 @@ pub fn get_screenshot_request() -> GetScreenshotResponse {
 
         loop {
             match capturer.frame() {
-                Ok(frame) => {
-                    screenshots.push(DisplayScreenshot {
-                        buffer: frame.to_vec(),
-                        width: w,
-                        height: h
-                    })
-                },
+                Ok(frame) => screenshots.push(DisplayScreenshot {
+                    buffer: frame.to_vec(),
+                    width: w,
+                    height: h,
+                }),
                 Err(error) => {
                     // TODO don't block forever
                     if error.kind() == WouldBlock {
@@ -45,6 +43,6 @@ pub fn get_screenshot_request() -> GetScreenshotResponse {
 
     GetScreenshotResponse {
         displays_screenshots: screenshots,
-        error_info: None
+        error_info: None,
     }
 }

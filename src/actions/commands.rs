@@ -1,14 +1,17 @@
 use crate::communication::messages::{ErrorInfo, RunCommandRequest, RunCommandResponse};
 use cmd_lib::run_fun;
-use std::io::Error;
 use log::{debug, error};
+use std::io::Error;
 
 pub fn run_command(command: &str) -> Result<String, Error> {
     run_fun!("{}", command)
 }
 
 pub fn run_command_message(request: RunCommandRequest) -> RunCommandResponse {
-    debug!("Got run command request: run command \"{}\" !", &request.command);
+    debug!(
+        "Got run command request: run command \"{}\" !",
+        &request.command
+    );
     let result = run_command(&request.command);
     match result {
         Ok(output) => {

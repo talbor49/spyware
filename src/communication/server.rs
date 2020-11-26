@@ -1,19 +1,20 @@
+use log::{debug, error, info};
 use std::io::{Error, Read, Write};
 use std::net::{Shutdown, TcpListener, TcpStream};
 use std::thread;
-use log::{debug, info, error};
 
-use ron;
-
-use crate::communication::messages::{DownloadFileRequest, GetBasicInfoRequest, Message, MessageType, MessageTypes, RunCommandRequest, MESSAGE_HEADER_LENGTH, GetScreenshotResponse};
+use crate::communication::messages::{
+    DownloadFileRequest, GetBasicInfoRequest, GetScreenshotResponse, Message, MessageType,
+    MessageTypes, RunCommandRequest, MESSAGE_HEADER_LENGTH,
+};
 use crate::communication::serialization::{extract_msg_type_and_length, serialize_message};
 use serde::Serialize;
 
 use crate::actions::basic_info::{download_file_message, get_basic_info_request};
 use crate::actions::commands::run_command_message;
-use num_traits::FromPrimitive;
 use crate::actions::log_actions::get_logs_request;
 use crate::actions::screenshot_actions::get_screenshot_request;
+use num_traits::FromPrimitive;
 
 pub const BIND_ANY: &str = "0.0.0.0";
 
@@ -46,11 +47,11 @@ fn handle_message(message: Message, stream: &TcpStream) {
                 ron::de::from_bytes(&message.serialized_message).unwrap();
             let response = get_basic_info_request();
             send_response(response, stream).unwrap();
-        },
+        }
         Some(MessageTypes::GetLogsRequest) => {
             let response = get_logs_request();
             send_response(response, stream).unwrap();
-        },
+        }
         Some(MessageTypes::GetScreenshotRequest) => {
             let response: GetScreenshotResponse = get_screenshot_request();
             send_response(response, stream).unwrap();
@@ -109,7 +110,7 @@ pub fn handle_client(stream: TcpStream) -> Result<(), Error> {
 pub fn run_server(port: u16) -> Result<(), Error> {
     // If we can't open the server, it probably means:
     // - The port is already taken, or we are not running in sufficient permissions
-    // - We thread both as recoverable errors, since if the port is not open now it might be open later.
+    // - We treat both as recoverable errors, since if the port is not open now it might be open later.
     // - And, in addition, we have other ways to communicate so we should try them too instead of panicking.
     let listener = TcpListener::bind(format!("{}:{}", BIND_ANY, port))?;
 
