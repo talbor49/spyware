@@ -1,9 +1,8 @@
 # Spyware
 
-[![build](https://travis-ci.org/talbor49/spyware.svg?branch=master)](https://travis-ci.org/talbor49/spyware)
+![Build](https://github.com/talbor49/spyware/workflows/Build/badge.svg)
 [![License:MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Coverage Status](https://coveralls.io/repos/github/talbor49/spyware/badge.svg)](https://coveralls.io/github/talbor49/spyware)
-
 ### Motivation
 Spyware that spies on you, by you (for once)
 
