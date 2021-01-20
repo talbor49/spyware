@@ -20,7 +20,9 @@ jobs:
           toolchain: nightly
           override: true
           profile: minimal
-
+      - name: Install dependencies
+        run:
+          sudo apt-get -y install libxcb1-dev libxcb-randr0-dev libxcb-randr0
       - name: Execute tests
         uses: actions-rs/cargo@v1
         with:
