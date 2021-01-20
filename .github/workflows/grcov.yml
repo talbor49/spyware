@@ -21,8 +21,8 @@ jobs:
           override: true
           profile: minimal
       - name: Install dependencies
-        run:
-          sudo apt-get -y install libxcb1-dev libxcb-randr0-dev libxcb-randr0
+        run: sudo apt-get -y install libxcb1-dev libxcb-randr0-dev libxcb-randr0
+        shell: bash
       - name: Execute tests
         uses: actions-rs/cargo@v1
         with:
