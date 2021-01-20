@@ -16,9 +16,8 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-
-     - name: Install dependencies
-      run: sudo apt-get -y install libxcb1-dev libxcb-randr0-dev libxcb-randr0
+      - name: Install dependencies
+        run: sudo apt-get -y install libxcb1-dev libxcb-randr0-dev libxcb-randr0
 
       - name: Run cargo check
         uses: actions-rs/cargo@v1
