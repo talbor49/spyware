@@ -9,7 +9,6 @@ use crate::communication::messages::{
 };
 use crate::communication::serialization::{extract_msg_type_and_length, serialize_message};
 
-
 use crate::actions::basic_info::{download_file_message, get_basic_info_request};
 use crate::actions::commands::run_command_message;
 use crate::actions::log_actions::get_logs_request;
@@ -61,7 +60,7 @@ pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
     let mut type_and_length = [0 as u8; MESSAGE_HEADER_LENGTH];
     match stream.read_exact(&mut type_and_length) {
         Ok(()) => {
-            let msg_length= extract_msg_type_and_length(type_and_length);
+            let msg_length = extract_msg_type_and_length(type_and_length);
             let mut message_buffer = vec![0; msg_length];
 
             // Read_exact function guarantees that we will read exactly enough data to fill the buffer

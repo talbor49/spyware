@@ -24,7 +24,10 @@ fn test_send_basic_command() {
         command: String::from(format!("echo {}", TO_ECHO)),
         async_run: false,
     };
-    let buffer = serialize_message(spyware::communication::messages::Message::RunCommandRequest { 0 : message}).unwrap();
+    let buffer = serialize_message(
+        spyware::communication::messages::Message::RunCommandRequest { 0: message },
+    )
+    .unwrap();
     stream
         .write(&buffer)
         .expect("Could not write to server after connection");

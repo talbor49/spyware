@@ -2,14 +2,13 @@ use std::io::{Cursor, Error};
 
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 
-
 use crate::communication::messages::{Message, MESSAGE_HEADER_LENGTH};
 
-pub fn extract_msg_type_and_length(type_and_length: [u8; MESSAGE_HEADER_LENGTH]) -> (usize) {
+pub fn extract_msg_type_and_length(type_and_length: [u8; MESSAGE_HEADER_LENGTH]) -> usize {
     let msg_length = &type_and_length[0..MESSAGE_HEADER_LENGTH];
     let mut rdr = Cursor::new(msg_length);
     let msg_length = rdr.read_u32::<BigEndian>().unwrap() as usize;
-    (msg_length)
+    msg_length
 }
 
 pub fn serialize_message(message: Message) -> Result<Vec<u8>, Error> {
