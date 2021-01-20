@@ -14,6 +14,9 @@ matrix:
   allow_failures:
     - rust: nightly
 
+before_install:
+  - sudo apt-get -y install libxcb1-dev
+
 before_cache: |
   if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
     cargo install cargo-tarpaulin -f
