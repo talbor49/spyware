@@ -15,7 +15,7 @@ pub mod actions;
 pub mod communication;
 pub mod logging;
 
-const RETRY_INTERVAL_SECONDS: u64 = 5;
+const RETRY_INTERVAL: time::Duration = time::Duration::from_secs(5);
 const SERVER_LISTENING_PORT: u16 = 13337;
 
 const CNC_SERVER_IP: &str = "127.0.0.1";
@@ -32,15 +32,15 @@ fn run_server_loop() {
             Err(e) => {
                 error!(
                     "Error {} when starting server. Trying again in {} seconds.",
-                    e, RETRY_INTERVAL_SECONDS
+                    e, RETRY_INTERVAL.as_secs()
                 );
             }
         }
         debug!(
             "Sleeping {} seconds until retrying to run server again",
-            RETRY_INTERVAL_SECONDS
+            RETRY_INTERVAL.as_secs()
         );
-        thread::sleep(time::Duration::from_secs(RETRY_INTERVAL_SECONDS));
+        thread::sleep(RETRY_INTERVAL);
     }
 }
 
@@ -65,7 +65,7 @@ fn run_cnc_connection_loop() {
                 );
             }
         }
-        std::thread::sleep(time::Duration::from_secs(RETRY_INTERVAL_SECONDS))
+        std::thread::sleep(RETRY_INTERVAL)
     }
 }
 
