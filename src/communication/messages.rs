@@ -9,13 +9,6 @@ pub struct ErrorInfo {
     pub as_string: String,
 }
 
-#[derive(Debug)]
-pub struct MessageBuffer {
-    pub message_type: u8,
-    pub serialized_message_length: usize,
-    pub serialized_message: Vec<u8>,
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RunCommandRequest {
     pub command: String,

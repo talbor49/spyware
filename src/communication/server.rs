@@ -3,10 +3,7 @@ use std::io::{Error, Read, Write};
 use std::net::{Shutdown, TcpListener, TcpStream};
 use std::thread;
 
-use crate::communication::messages::{
-    DownloadFileRequest, GetBasicInfoRequest, GetScreenshotResponse, Message, MessageBuffer,
-    RunCommandRequest, MESSAGE_HEADER_LENGTH,
-};
+use crate::communication::messages::{GetScreenshotResponse, Message, MESSAGE_HEADER_LENGTH};
 use crate::communication::serialization::{extract_msg_type_and_length, serialize_message};
 
 use crate::actions::basic_info::{download_file_message, get_basic_info_request};
