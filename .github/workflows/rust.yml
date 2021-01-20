@@ -8,11 +8,12 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: sudo apt-get -y install libxcb1-dev libxcb-randr0-dev libxcb-randr0
     - name: Build
       run: cargo build --verbose
     - name: Run tests
