@@ -8,7 +8,7 @@ use crate::communication::messages::{
     RunCommandRequest, MESSAGE_HEADER_LENGTH,
 };
 use crate::communication::serialization::{extract_msg_type_and_length, serialize_message};
-use serde::Serialize;
+
 
 use crate::actions::basic_info::{download_file_message, get_basic_info_request};
 use crate::actions::commands::run_command_message;
@@ -39,17 +39,17 @@ fn handle_message(message_buffer: MessageBuffer, stream: &TcpStream) {
             let msg = Message::DownloadFileResponse { 0: response };
             send_response(msg, stream).unwrap();
         }
-        Message::GetBasicInfoRequest(bir) => {
+        Message::GetBasicInfoRequest(_bir) => {
             let response = get_basic_info_request();
             let msg = Message::GetBasicInfoResponse { 0: response };
             send_response(msg, stream).unwrap();
         }
-        Message::GetLogsRequest(glr) => {
+        Message::GetLogsRequest(_glr) => {
             let response = get_logs_request();
             let msg = Message::GetLogsResponse { 0: response };
             send_response(msg, stream).unwrap();
         }
-        Message::GetScreenshotRequest(gsr) => {
+        Message::GetScreenshotRequest(_gsr) => {
             let response: GetScreenshotResponse = get_screenshot_request();
             let msg = Message::GetScreenshotResponse { 0: response };
             send_response(msg, stream).unwrap();

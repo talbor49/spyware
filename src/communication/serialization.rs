@@ -1,7 +1,7 @@
 use std::io::{Cursor, Error};
 
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
-use serde::Serialize;
+
 
 use crate::communication::messages::{Message, MESSAGE_HEADER_LENGTH, MESSAGE_TYPE_SIZE};
 
@@ -21,7 +21,6 @@ pub fn serialize_message(message: Message) -> Result<Vec<u8>, Error> {
     let message_len = serialized_message.len();
 
     let mut buffer: Vec<u8> = Vec::with_capacity(message_len + MESSAGE_HEADER_LENGTH);
-    // buffer.push(message as u8);
     buffer.write_u32::<BigEndian>(message_len as u32)?;
     buffer.extend(serialized_message.into_bytes());
     Ok(buffer)

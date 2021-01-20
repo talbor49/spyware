@@ -12,7 +12,7 @@ fn test_download_file_request() {
     let message = DownloadFileRequest {
         path: String::from("/tmp/thefile"),
     };
-    let buffer = serialize_message(message).unwrap();
+    let buffer = serialize_message(spyware::communication::messages::Message::DownloadFileRequest { 0 : message }).unwrap();
     println!("Sending download file request to server");
     stream.write(&buffer).unwrap();
     println!("Trying to get response from server...");
