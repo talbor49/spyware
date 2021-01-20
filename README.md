@@ -2,7 +2,7 @@
 
 [![build](https://travis-ci.org/talbor49/spyware.svg?branch=master)](https://travis-ci.org/talbor49/spyware)
 [![License:MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![codecov](https://codecov.io/gh/talbor49/rustdoor/branch/master/graph/badge.svg)](https://codecov.io/gh/talbor49/rustdoor)
+[![Coverage Status](https://coveralls.io/repos/github/talbor49/spyware/badge.svg)](https://coveralls.io/github/talbor49/spyware)
 
 ### Motivation
 Spyware that spies on you, by you (for once)
