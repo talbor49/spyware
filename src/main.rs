@@ -32,7 +32,8 @@ fn run_server_loop() {
             Err(e) => {
                 error!(
                     "Error {} when starting server. Trying again in {} seconds.",
-                    e, RETRY_INTERVAL.as_secs()
+                    e,
+                    RETRY_INTERVAL.as_secs()
                 );
             }
         }
