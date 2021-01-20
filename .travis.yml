@@ -24,6 +24,7 @@ before_cache: |
   fi
 
 script:
+  - sudo apt-get install -y libxcb-randr0-dev libxcb-randr0
   - cargo clean
   - cargo build
   - cargo test
