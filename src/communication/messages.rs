@@ -1,8 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-pub const MESSAGE_TYPE_SIZE: usize = 1;
 pub const MESSAGE_LENGTH_SIZE: usize = 4;
-pub const MESSAGE_HEADER_LENGTH: usize = MESSAGE_TYPE_SIZE + MESSAGE_LENGTH_SIZE;
+pub const MESSAGE_HEADER_LENGTH: usize = MESSAGE_LENGTH_SIZE;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ErrorInfo {

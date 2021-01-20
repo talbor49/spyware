@@ -24,8 +24,7 @@ fn send_response(response: Message, mut stream: &TcpStream) -> Result<(), Error>
     Ok(())
 }
 
-fn handle_message(message_buffer: MessageBuffer, stream: &TcpStream) {
-    let message: Message = ron::de::from_bytes(&message_buffer.serialized_message).unwrap();
+fn handle_message(message: Message, stream: &TcpStream) {
     match message {
         Message::RunCommandRequest(rcr) => {
             //         let request: RunCommandRequest =
@@ -58,22 +57,19 @@ fn handle_message(message_buffer: MessageBuffer, stream: &TcpStream) {
     }
 }
 
-pub fn get_message(mut stream: &TcpStream) -> Result<MessageBuffer, Error> {
+pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
     let mut type_and_length = [0 as u8; MESSAGE_HEADER_LENGTH];
     match stream.read_exact(&mut type_and_length) {
         Ok(()) => {
-            let (msg_type, msg_length) = extract_msg_type_and_length(type_and_length);
-            let mut message = vec![0; msg_length];
+            let msg_length= extract_msg_type_and_length(type_and_length);
+            let mut message_buffer = vec![0; msg_length];
 
             // Read_exact function guarantees that we will read exactly enough data to fill the buffer
             stream
-                .read_exact(&mut message)
+                .read_exact(&mut message_buffer)
                 .expect("Could not read message after getting message metadata. Error: {}");
-            Ok(MessageBuffer {
-                message_type: msg_type,
-                serialized_message_length: msg_length,
-                serialized_message: message,
-            })
+            let msg: Message = ron::de::from_bytes(&message_buffer).unwrap();
+            Ok(msg)
         }
         Err(e) => {
             error!(
@@ -91,10 +87,12 @@ pub fn handle_client(stream: TcpStream) -> Result<(), Error> {
     debug!("Handling connection from {}", stream.peer_addr()?);
     while match get_message(&stream) {
         Ok(message) => {
+            println!("Got message!!!");
             handle_message(message, &stream);
             true
         }
         Err(e) => {
+            println!("Error!!");
             error!(
                 "An error occurred while trying to get message. Error: {}",
                 e
