@@ -52,7 +52,7 @@ fn handle_message(message: Message, stream: &TcpStream) {
 }
 
 pub fn get_message(mut stream: &TcpStream) -> Result<Message, Error> {
-    let mut type_and_length = [0 as u8; MESSAGE_HEADER_LENGTH];
+    let mut type_and_length = [0_u8; MESSAGE_HEADER_LENGTH];
     match stream.read_exact(&mut type_and_length) {
         Ok(()) => {
             let msg_length = extract_msg_type_and_length(type_and_length);

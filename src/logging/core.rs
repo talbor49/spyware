@@ -55,8 +55,8 @@ impl MemoryLogger {
         MEMORY_LOGGER_INSTANCE.get()
     }
 
-    fn get_logs(&self) -> Result<Vec<String>, LoggingError> {
-        Ok(self.inner_memory_logger.read().unwrap().get_all_logs())
+    fn get_logs(&self) -> Vec<String> {
+        self.inner_memory_logger.read().unwrap().get_all_logs()
     }
 
     fn clear(&self) {
@@ -92,7 +92,7 @@ pub fn destroy_logging() {
 
 pub fn get_logs() -> Result<Vec<String>, LoggingError> {
     match MemoryLogger::global() {
-        Some(logger) => Ok(logger.get_logs().unwrap()),
+        Some(logger) => Ok(logger.get_logs()),
         _ => Err(LoggingError::LoggingNotInitializedError),
     }
 }
