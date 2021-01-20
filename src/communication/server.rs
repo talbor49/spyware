@@ -23,31 +23,29 @@ fn send_response(response: Message, mut stream: &TcpStream) -> Result<(), Error>
 fn handle_message(message: Message, stream: &TcpStream) {
     match message {
         Message::RunCommandRequest(rcr) => {
-            //         let request: RunCommandRequest =
-            //             ron::de::from_bytes(&message.serialized_message).unwrap();
             let response = run_command_message(rcr);
-            let msg = Message::RunCommandResponse { 0: response };
-            send_response(msg, stream).unwrap();
+            let response = Message::RunCommandResponse { 0: response };
+            send_response(response, stream).unwrap();
         }
         Message::DownloadFileRequest(dfr) => {
             let response = download_file_message(dfr);
-            let msg = Message::DownloadFileResponse { 0: response };
-            send_response(msg, stream).unwrap();
+            let response = Message::DownloadFileResponse { 0: response };
+            send_response(response, stream).unwrap();
         }
         Message::GetBasicInfoRequest(_bir) => {
             let response = get_basic_info_request();
-            let msg = Message::GetBasicInfoResponse { 0: response };
-            send_response(msg, stream).unwrap();
+            let response = Message::GetBasicInfoResponse { 0: response };
+            send_response(response, stream).unwrap();
         }
         Message::GetLogsRequest(_glr) => {
             let response = get_logs_request();
-            let msg = Message::GetLogsResponse { 0: response };
-            send_response(msg, stream).unwrap();
+            let response = Message::GetLogsResponse { 0: response };
+            send_response(response, stream).unwrap();
         }
         Message::GetScreenshotRequest(_gsr) => {
             let response: GetScreenshotResponse = get_screenshot_request();
-            let msg = Message::GetScreenshotResponse { 0: response };
-            send_response(msg, stream).unwrap();
+            let response = Message::GetScreenshotResponse { 0: response };
+            send_response(response, stream).unwrap();
         }
         _ => error!("Unrecognized message type"),
     }
